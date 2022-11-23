@@ -1,6 +1,7 @@
 spring:
-  security:
-    oauth2:
-      resourceserver:
-        jwt:
-          issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+  kafka:
+    bootstrap-servers: localhost:29092
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
+    username: user_catalog
+    password: 123456789
