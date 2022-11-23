@@ -1,0 +1,17 @@
+fint:
+  org-id: fintlabs.no
+  flyt:
+    resource-gateway:
+      authorization:
+        enable: true
+  client:
+    base-url: https://beta.felleskomponent.no
+  kafka:
+    default-replicas: 1
+spring:
+  kafka:
+    bootstrap-servers: localhost:9092
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
+    username: user_catalog
+    password: 123456789

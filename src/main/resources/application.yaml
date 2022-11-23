@@ -1,7 +1,18 @@
+fint:
+  application-id: fint-kontroll-user-catalog
+  cache:
+    defaultCacheEntryTimeToLiveMillis: 518400000
+    defaultCacheHeapSize: 1000000
+  kafka:
+    topic:
+      org-id: ${fint.org-id}
+      domain-context: ressurs
+    application-id: ${fint.application-id}
 spring:
   kafka:
-    bootstrap-servers: localhost:29092
-  datasource:
-    url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
-    username: user_catalog
-    password: 123456789
+    consumer:
+      group-id: ${fint.application-id}
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: INFO
