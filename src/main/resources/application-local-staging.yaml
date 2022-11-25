@@ -12,6 +12,9 @@ spring:
   kafka:
     bootstrap-servers: localhost:9092
   datasource:
-    url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
-    username: user_catalog
-    password: 123456789
+      hikari:
+        schema: fylke
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
+      username: user_catalog
+      password: 123456

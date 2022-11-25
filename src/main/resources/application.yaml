@@ -12,7 +12,26 @@ spring:
   kafka:
     consumer:
       group-id: ${fint.application-id}
+#  datasource:
+#    hikari:
+#      schema: fylke
+#    driver-class-name: org.postgresql.Driver
+#    url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
+#    username: user_catalog
+#    password: 123456
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: validate
+    datasource:
+      driver-class-name: org.postgresql.Driver
 logging:
   level:
     root: INFO
     org.apache.kafka: INFO
+
