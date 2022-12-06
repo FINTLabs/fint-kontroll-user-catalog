@@ -2,14 +2,48 @@ package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.model.User;
+import no.fintlabs.repository.UserRepository;
+import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 
 @Service
 @Slf4j
 public class UserService {
-    int x = 0;
-    public void process(User user) {
-      //log.info(user.getUserId());
-      log.info(String.valueOf(x++));
+    @Autowired
+    private UserRepository userRepository;
+
+    public User save(User user) {
+        return userRepository.save(user);
+    }
+
+    public Flux<User> getAllUsers(FintJwtEndUserPrincipal from) {
+        List<User> allUsers  = userRepository.findAll().stream().collect(Collectors.toList());
+        return Flux.fromIterable(allUsers);
+    }
+
+    public Mono<User> getById(FintJwtEndUserPrincipal from, String id) {
+        User user = userRepository.findById(id).orElse(new User());
+
+        return Mono.just(user);
+
+    }
+
+    public Flux<User> getAllUsersByUserType(FintJwtEndUserPrincipal from, String usertype) {
+        List<User> allUsers = userRepository.findByUserType(usertype);
+
+        return Flux.fromIterable(allUsers);
+    }
+
+    public Flux<User> getAllUsersFirstnameStartingWith(FintJwtEndUserPrincipal from, String firstnamepart) {
+        List<User> allUsers = userRepository.findAllUsersByStartingFirstnameWith(firstnamepart);
+        return Flux.fromIterable(allUsers);
     }
 }

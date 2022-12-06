@@ -8,13 +8,15 @@ import javax.persistence.*;
 
 @Data
 @Slf4j
-@Entity(name = "rolerefs")
+@Entity
 @Table(name= "rolerefs")
 public class RoleRefs {
     @Id
+    @Column(name="userid")
     private String userId;
+    @Column(name="rolerefs")
     private String roleRefs;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    User user;
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    User user;
 }

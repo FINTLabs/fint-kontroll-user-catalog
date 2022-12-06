@@ -24,7 +24,7 @@ public class UserConsumerConfiguration {
         ConcurrentMessageListenerContainer container = entityConsumerFactoryService.createFactory(
                 User.class,
                 (ConsumerRecord<String,User> consumerRecord)
-                -> userService.process(consumerRecord.value()))
+                -> userService.save(consumerRecord.value()))
                         .createContainer(entityTopicNameParameters);
 
         return container;
