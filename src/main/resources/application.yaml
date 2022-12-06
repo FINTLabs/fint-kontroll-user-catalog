@@ -8,17 +8,18 @@ fint:
       org-id: ${fint.org-id}
       domain-context: ressurs
     application-id: ${fint.application-id}
+  integration:
+    service:
+      authorized-role: https://role-catalog.vigoiks.no/vigo/samtykke/user
+  client:
+    password: ''
+    username: ''
+    base-url: https://beta.felleskomponent.no
+    registration-id: fint
 spring:
   kafka:
     consumer:
       group-id: ${fint.application-id}
-#  datasource:
-#    hikari:
-#      schema: fylke
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://localhost:5432/fint_kontroll_user_catalog
-#    username: user_catalog
-#    password: 123456
   jpa:
     properties:
       hibernate:
@@ -30,6 +31,7 @@ spring:
       ddl-auto: validate
     datasource:
       driver-class-name: org.postgresql.Driver
+
 logging:
   level:
     root: INFO
