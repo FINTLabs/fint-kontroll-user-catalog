@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 
 @Service
@@ -24,11 +25,17 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Flux<User> getAllUsers(FintJwtEndUserPrincipal from) {
-        List<User> allUsers  = userRepository.findAll().stream().collect(Collectors.toList());
+    public Flux<User> getAllUsers(FintJwtEndUserPrincipal principal) {
+        List<User> allUsers  = userRepository .findAll().stream().collect(Collectors.toList());
+
         return Flux.fromIterable(allUsers);
     }
 
+    public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
+
+
+        return userRepository .findAll().stream();
+    }
     public Mono<User> getById(FintJwtEndUserPrincipal from, String id) {
         User user = userRepository.findById(id).orElse(new User());
 
