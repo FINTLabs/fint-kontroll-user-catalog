@@ -32,9 +32,7 @@ public class UserService {
     }
 
     public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
-
-
-        return userRepository .findAll().stream();
+        return userRepository.findAll().stream();
     }
     public Mono<User> getById(FintJwtEndUserPrincipal from, String id) {
         User user = userRepository.findById(id).orElse(new User());

@@ -1,6 +1,7 @@
 package no.fintlabs.repository;
 
 import no.fintlabs.model.User;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,7 +26,7 @@ public interface UserRepository extends JpaRepository<User,String> {
     List<User> findUsersByFirstNamePartAndIsStudent(@Param("firstName") String firstName, @Param("userType") String userType);
 
     @Query("select u from User u order by u.firstName")
-    List<User> findAllUsersPagable(Pageable pageable);
+    Page<User> findAllUsersPagable(Pageable pageable);
 
 
 
