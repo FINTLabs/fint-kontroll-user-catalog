@@ -46,7 +46,7 @@ public class UserController {
     }
 
 
-    @GetMapping("pageing")
+    @GetMapping("/pageing")
     public ResponseEntity<Map<String, Object>> getUsersPagable(@AuthenticationPrincipal Jwt jwt,
                                                                @RequestParam(defaultValue = "0") int page,
                                                                @RequestParam(defaultValue = "3") int size) {
@@ -54,12 +54,29 @@ public class UserController {
         return userService.getAllUsersPaged(FintJwtEndUserPrincipal.from(jwt), page, size);
     }
 
+
+
+
+    @GetMapping("/allinone")
+    public ResponseEntity<Map<String,Object>> getUsersAllinone(
+            @AuthenticationPrincipal Jwt jwt,
+            @RequestParam(value = "$filter",required = false) String filter,
+            @RequestParam(value = "page",defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "3") int size ){
+
+    }
+
+
+
+
     //TODO: erstattes av getUserbyfilter når fint-antlr støtter startsWith()
     @GetMapping("/startswith")
     public Flux<User> getAllUsersFirstnameStartingWith(@RequestParam("firstnamepart") String firstnamepart,
                                                        @AuthenticationPrincipal Jwt jwt) {
-        log.info("Search for users with firstname startng with : " + firstnamepart);
+        log.info("Search for users with firstname starting with : " + firstnamepart);
         return userService.getAllUsersFirstnameStartingWith(FintJwtEndUserPrincipal.from(jwt), firstnamepart);
 
     }
+
+
 }

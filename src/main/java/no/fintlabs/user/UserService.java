@@ -61,4 +61,21 @@ public class UserService {
         return new ResponseEntity<>(response, HttpStatus.OK);
 
     }
+
+    public ResponseEntity<Map<String, Object>> getAllUsersAllinone(FintJwtEndUserPrincipal principal, int page, int size) {
+
+        Pageable paging = PageRequest.of(page, size);
+        Page<User> userPage;
+        userPage = userRepository.findAllUsersPagable(paging);
+        List<User> content = userPage.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalItems", userPage.getTotalElements());
+        response.put("users", content);
+        response.put("currentPage", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
+    }
 }
