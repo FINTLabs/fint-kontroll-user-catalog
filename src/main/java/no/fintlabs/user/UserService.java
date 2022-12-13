@@ -5,12 +5,17 @@ import no.fintlabs.model.User;
 import no.fintlabs.repository.UserRepository;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
+import java.util.HashMap;
 import java.util.List;
-import java.util.Optional;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,21 +39,26 @@ public class UserService {
     public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
         return userRepository.findAll().stream();
     }
-    public Mono<User> getById(FintJwtEndUserPrincipal from, String id) {
-        User user = userRepository.findById(id).orElse(new User());
-
-        return Mono.just(user);
-
-    }
-
-    public Flux<User> getAllUsersByUserType(FintJwtEndUserPrincipal from, String usertype) {
-        List<User> allUsers = userRepository.findByUserType(usertype);
-
-        return Flux.fromIterable(allUsers);
-    }
 
     public Flux<User> getAllUsersFirstnameStartingWith(FintJwtEndUserPrincipal from, String firstnamepart) {
         List<User> allUsers = userRepository.findAllUsersByStartingFirstnameWith(firstnamepart);
         return Flux.fromIterable(allUsers);
+    }
+
+    public ResponseEntity<Map<String, Object>> getAllUsersPaged(FintJwtEndUserPrincipal principal, int page, int size) {
+
+        Pageable paging = PageRequest.of(page, size);
+        Page<User> userPage;
+        userPage = userRepository.findAllUsersPagable(paging);
+        List<User> content = userPage.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalItems", userPage.getTotalElements());
+        response.put("users", content);
+        response.put("currentPage", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
+
     }
 }
