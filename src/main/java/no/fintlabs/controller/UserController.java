@@ -64,6 +64,7 @@ public class UserController {
             @RequestParam(value = "page",defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "3") int size ){
 
+        return userService.getFilteredAndPagedUsers(FintJwtEndUserPrincipal.from(jwt),filter,page,size);
     }
 
 
