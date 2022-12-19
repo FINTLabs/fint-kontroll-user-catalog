@@ -24,8 +24,8 @@ import java.util.Random;
 import java.util.UUID;
 
 @Slf4j
-//@ConditionalOnProperty(prefix = "fint.kontroll.user-catalog", name = "load-test-users", value = "true")
-@PropertySource("classpath:application-nokafka.yaml")
+@ConditionalOnProperty(value = "fint.kontroll.user-catalog.load-test-users", havingValue = "true")
+//@PropertySource("classpath:application-nokafka.yaml")
 @Service
 public class TestUserService {
     private final UserService userService;
@@ -33,6 +33,9 @@ public class TestUserService {
     private final WebClient webClient;
     @Value("${fint.kontroll.user-catalog.synthetic-user-token}")
     String synthUserToken;
+
+    @Value("${fint.kontroll.user-catalog.number-of-test-users}")
+    int numberOfTestUsers;
 
     public TestUserService(UserService userService) {
         this.userService = userService;
@@ -70,7 +73,7 @@ public class TestUserService {
 
 
 
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < numberOfTestUsers; i++) {
 
             String response = webClient.get()
                     .uri("api/contact-generator?localization=no_NO&token="+synthUserToken)
