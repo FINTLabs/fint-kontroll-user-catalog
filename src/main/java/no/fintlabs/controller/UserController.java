@@ -1,6 +1,5 @@
 package no.fintlabs.controller;
 
-
 import lombok.extern.slf4j.Slf4j;
 import no.fint.antlr.FintFilterService;
 import no.fintlabs.model.User;
@@ -60,7 +59,7 @@ public class UserController {
     @GetMapping("/allinone")
     public ResponseEntity<Map<String,Object>> getUsersAllinone(
             @AuthenticationPrincipal Jwt jwt,
-            @RequestParam(value = "$filter",required = false) String filter,
+            @RequestParam(value = "$filter",defaultValue = "") String filter,
             @RequestParam(value = "page",defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "3") int size ){
 

@@ -45,6 +45,8 @@ dependencies {
     implementation 'no.fintlabs:fint-resource-server-security:1.1.0'
     implementation 'no.fint:fint-model-resource:0.4.1'
     implementation 'io.projectreactor:reactor-core'
+    implementation 'org.apache.commons:commons-collections4:4.4'
+
 
 
     compileOnly 'org.projectlombok:lombok'

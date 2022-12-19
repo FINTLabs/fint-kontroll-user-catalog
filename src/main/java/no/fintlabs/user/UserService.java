@@ -15,10 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -56,37 +53,27 @@ public class UserService {
         Pageable paging = PageRequest.of(page, size);
         Page<User> userPage;
         userPage = userRepository.findAllUsersPagable(paging);
-        List<User> content = userPage.getContent();
 
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalItems", userPage.getTotalElements());
-        response.put("users", content);
-        response.put("currentPage", userPage.getNumber());
-        response.put("totalPages", userPage.getTotalPages());
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-
+        return createResponsForPaging(userPage);
     }
 
-    public ResponseEntity<Map<String, Object>> getFilteredAndPagedUsers(FintJwtEndUserPrincipal principal, String filter, int page, int size) {
 
-        Stream<User> allUsers = userRepository.findAll().stream();
-        List<User>filteredResult = fintFilterService.from(allUsers, filter).toList();
-
+    public ResponseEntity<Map<String, Object>> getFilteredAndPagedUsers(
+            FintJwtEndUserPrincipal principal,
+            String filter,
+            int page,
+            int size) {
+        List<User> allUsers = userRepository.findAll();
         Pageable paging = PageRequest.of(page, size);
-        Page<User> userPage = fromListToPage(filteredResult,paging);
+        if (filter.isEmpty()){
+            Page<User> userPage = fromListToPage(allUsers,paging);
+            return createResponsForPaging(userPage);
 
-
-        List<User> content = userPage.getContent();
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("totalItems", userPage.getTotalElements());
-        response.put("users", content);
-        response.put("currentPage", userPage.getNumber());
-        response.put("totalPages", userPage.getTotalPages());
-
-        return new ResponseEntity<>(response, HttpStatus.OK);
-
+        } else {
+            List<User>filteredResult = fintFilterService.from(allUsers.stream(), filter).toList();
+            Page<User> userPage = fromListToPage(filteredResult,paging);
+            return createResponsForPaging(userPage);
+        }
     }
 
 
@@ -96,5 +83,18 @@ public class UserService {
         if(start > list.size())
             return new PageImpl<>(new ArrayList<>(), paging, list.size());
         return new PageImpl<>(list.subList(start, end), paging, list.size());
+    }
+
+
+    private ResponseEntity<Map<String, Object>> createResponsForPaging(Page<User> userPage) {
+        List<User> content = userPage.getContent();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalItems", userPage.getTotalElements());
+        response.put("users", content);
+        response.put("currentPage", userPage.getNumber());
+        response.put("totalPages", userPage.getTotalPages());
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

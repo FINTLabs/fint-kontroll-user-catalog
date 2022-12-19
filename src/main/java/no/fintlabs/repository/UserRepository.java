@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface UserRepository extends JpaRepository<User,String> {
+public interface UserRepository extends JpaRepository<User,Long> {
 
     @Query("select u from User u where upper(u.userType) = upper(?1)")
     List<User> findByUserType(String userType);
@@ -27,6 +27,8 @@ public interface UserRepository extends JpaRepository<User,String> {
 
     @Query("select u from User u order by u.firstName")
     Page<User> findAllUsersPagable(Pageable pageable);
+
+  //  List<User> findUsersByFirstNameIsStartingWithAndUserTypeIs
 
 
 
