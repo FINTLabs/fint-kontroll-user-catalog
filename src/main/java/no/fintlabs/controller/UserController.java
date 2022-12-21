@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
 import java.util.Map;
 import java.util.stream.Stream;
 
@@ -31,6 +33,17 @@ public class UserController {
         log.info("Fetching all users");
 
         return userService.getAllUsers(FintJwtEndUserPrincipal.from(jwt));
+    }
+
+    @GetMapping({"/id/{id}"})
+    public Mono<User> getById(@AuthenticationPrincipal Jwt jwt,@PathVariable Long id ){
+        return userService.getUserById(id);
+    }
+
+    @GetMapping({"/resourceid/{id}"})
+    public Mono<User> getById(@AuthenticationPrincipal Jwt jwt,@PathVariable String id ){
+        log.info("ResourceId : " + id);
+        return userService.getUserByResourceId(id);
     }
 
 

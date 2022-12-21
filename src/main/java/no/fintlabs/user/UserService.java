@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -96,5 +97,15 @@ public class UserService {
         response.put("totalPages", userPage.getTotalPages());
 
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public Mono<User> getUserById(Long id) {
+
+        return Mono.just(userRepository.findById(id).orElse(new User()));
+   }
+
+    public Mono<User> getUserByResourceId(String id) {
+
+        return Mono.just(userRepository.findByResourceId(id).orElse(new User()));
     }
 }

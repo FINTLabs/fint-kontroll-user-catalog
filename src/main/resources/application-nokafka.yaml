@@ -12,7 +12,7 @@ fint:
   kontroll:
     user-catalog:
       load-test-users: true
-      number-of-test-users: 20
+      number-of-test-users: 10
       synthetic-user-token:
 spring:
   jpa:
