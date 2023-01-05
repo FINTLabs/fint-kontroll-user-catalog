@@ -32,7 +32,9 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("select u from User u where upper(u.resourceId) = upper(:resourceId)")
     Optional<User> findByResourceId(@Param("resourceId") String resourceId);
 
-  //  List<User> findUsersByFirstNameIsStartingWithAndUserTypeIs
+    Optional<User> findByResourceIdContainingIgnoreCase(String resourceId);
+
+    //  List<User> findUsersByFirstNameIsStartingWithAndUserTypeIs
 
 
 

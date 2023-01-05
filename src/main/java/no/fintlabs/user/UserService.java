@@ -31,11 +31,20 @@ public class UserService {
     private FintFilterService fintFilterService;
 
     public User save(User user) {
-        return userRepository.save(user);
+        String userResourceId = user.getResourceId();
+        User existingUser = userRepository.findByResourceIdContainingIgnoreCase(userResourceId).orElse(null);
+        if (existingUser == null) {
+            return userRepository.save(user);
+        } else {
+            user.setId(existingUser.getId());
+            return userRepository.save(user);
+        }
+
     }
 
+
     public Flux<User> getAllUsers(FintJwtEndUserPrincipal principal) {
-        List<User> allUsers  = userRepository .findAll().stream().collect(Collectors.toList());
+        List<User> allUsers = userRepository.findAll().stream().collect(Collectors.toList());
 
         return Flux.fromIterable(allUsers);
     }
@@ -66,13 +75,13 @@ public class UserService {
             int size) {
         List<User> allUsers = userRepository.findAll();
         Pageable paging = PageRequest.of(page, size);
-        if (filter.isEmpty()){
-            Page<User> userPage = fromListToPage(allUsers,paging);
+        if (filter.isEmpty()) {
+            Page<User> userPage = fromListToPage(allUsers, paging);
             return createResponsForPaging(userPage);
 
         } else {
-            List<User>filteredResult = fintFilterService.from(allUsers.stream(), filter).toList();
-            Page<User> userPage = fromListToPage(filteredResult,paging);
+            List<User> filteredResult = fintFilterService.from(allUsers.stream(), filter).toList();
+            Page<User> userPage = fromListToPage(filteredResult, paging);
             return createResponsForPaging(userPage);
         }
     }
@@ -81,7 +90,7 @@ public class UserService {
     private Page<User> fromListToPage(List<User> list, Pageable paging) {
         int start = (int) paging.getOffset();
         int end = Math.min((start + paging.getPageSize()), list.size());
-        if(start > list.size())
+        if (start > list.size())
             return new PageImpl<>(new ArrayList<>(), paging, list.size());
         return new PageImpl<>(list.subList(start, end), paging, list.size());
     }
@@ -102,7 +111,7 @@ public class UserService {
     public Mono<User> getUserById(Long id) {
 
         return Mono.just(userRepository.findById(id).orElse(new User()));
-   }
+    }
 
     public Mono<User> getUserByResourceId(String id) {
 

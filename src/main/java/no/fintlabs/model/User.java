@@ -18,7 +18,7 @@ public class User {
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(name="resourceid")
+    @Column(name="resourceid",unique = true)
     private String resourceId;
     @Column(name = "firstname")
     private String firstName;
