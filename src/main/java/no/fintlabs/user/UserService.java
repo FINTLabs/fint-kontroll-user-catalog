@@ -40,19 +40,12 @@ public class UserService {
 
         if (existingUser == null) {
             User newUser = userRepository.save(user);
-            Member newMember = Member.builder()
-                    .resourceId(newUser.getResourceId())
-                    .id(newUser.getId())
-                    .build();
-
+            Member newMember = memberService.create(newUser);
             memberService.process(newMember);
             return newUser;
         } else {
             user.setId(existingUser.getId());
-            Member member = Member.builder()
-                    .resourceId(existingUser.getResourceId())
-                    .id(existingUser.getId())
-                    .build();
+            Member member = memberService.create(user);
             memberService.process(member);
             return userRepository.save(user);
 
