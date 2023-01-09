@@ -2,6 +2,8 @@ package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fint.antlr.FintFilterService;
+import no.fintlabs.member.Member;
+import no.fintlabs.member.MemberService;
 import no.fintlabs.model.User;
 import no.fintlabs.repository.UserRepository;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
@@ -28,26 +30,38 @@ public class UserService {
     private UserRepository userRepository;
 
     @Autowired
+    private MemberService memberService;
+    @Autowired
     private FintFilterService fintFilterService;
 
     public User save(User user) {
         String userResourceId = user.getResourceId();
         User existingUser = userRepository.findByResourceIdContainingIgnoreCase(userResourceId).orElse(null);
-        Long id =
 
         if (existingUser == null) {
-            return userRepository.save(user);
+            User newUser = userRepository.save(user);
+            Member newMember = Member.builder()
+                    .resourceId(newUser.getResourceId())
+                    .id(newUser.getId())
+                    .build();
+
+            memberService.process(newMember);
+            return newUser;
         } else {
             user.setId(existingUser.getId());
+            Member member = Member.builder()
+                    .resourceId(existingUser.getResourceId())
+                    .id(existingUser.getId())
+                    .build();
+            memberService.process(member);
             return userRepository.save(user);
-        }
 
+        }
     }
 
 
     public Flux<User> getAllUsers(FintJwtEndUserPrincipal principal) {
         List<User> allUsers = userRepository.findAll().stream().collect(Collectors.toList());
-
         return Flux.fromIterable(allUsers);
     }
 
@@ -65,7 +79,6 @@ public class UserService {
         Pageable paging = PageRequest.of(page, size);
         Page<User> userPage;
         userPage = userRepository.findAllUsersPagable(paging);
-
         return createResponsForPaging(userPage);
     }
 
@@ -106,17 +119,14 @@ public class UserService {
         response.put("users", content);
         response.put("currentPage", userPage.getNumber());
         response.put("totalPages", userPage.getTotalPages());
-
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     public Mono<User> getUserById(Long id) {
-
         return Mono.just(userRepository.findById(id).orElse(new User()));
     }
 
     public Mono<User> getUserByResourceId(String id) {
-
         return Mono.just(userRepository.findByResourceId(id).orElse(new User()));
     }
 }

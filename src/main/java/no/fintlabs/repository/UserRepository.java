@@ -18,6 +18,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     List<User> findByUserType(String userType);
 
 
+
     @Query("select u from User u where upper(u.firstName) like upper(concat(:firstName, '%'))")
     List<User> findAllUsersByStartingFirstnameWith(@Param("firstName") String firstName);
 
