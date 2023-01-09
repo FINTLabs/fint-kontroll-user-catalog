@@ -46,6 +46,7 @@ dependencies {
     implementation 'no.fint:fint-model-resource:0.4.1'
     implementation 'io.projectreactor:reactor-core'
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.modelmapper:modelmapper:3.1.1'
 
 
 

@@ -33,6 +33,8 @@ public class UserService {
     public User save(User user) {
         String userResourceId = user.getResourceId();
         User existingUser = userRepository.findByResourceIdContainingIgnoreCase(userResourceId).orElse(null);
+        Long id =
+
         if (existingUser == null) {
             return userRepository.save(user);
         } else {

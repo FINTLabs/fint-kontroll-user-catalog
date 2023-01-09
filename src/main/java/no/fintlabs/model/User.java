@@ -30,9 +30,8 @@ public class User {
     private String userName;
     @Column(name = "identityprovideruserobjectid")
     private UUID identityProviderUserObjectId;
-
-    //    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-//    private List<RoleRefs> roleRefs = new ArrayList<>();
+    @Column(name="organisationunitname")
+    private String organisationUnitName;
     @Column(name="mobilephone")
     private String mobilePhone;
     @Column(name ="email")
