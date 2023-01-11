@@ -1,6 +1,6 @@
 package no.fintlabs.member;
 
-import no.fintlabs.model.User;
+import no.fintlabs.user.User;
 import org.springframework.stereotype.Service;
 
 @Service

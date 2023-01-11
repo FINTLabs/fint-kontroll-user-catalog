@@ -1,4 +1,4 @@
-package no.fintlabs.model;
+package no.fintlabs.user;
 
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;

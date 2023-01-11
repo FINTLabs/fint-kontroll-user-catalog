@@ -1,16 +1,14 @@
 package no.fintlabs.dto;
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
+@Builder
 public class UserDTOforList {
 
-    private String name;
-    private String orgUnit;
+    private Long id;
+    private String fullName;
+    private String organisationUnitName;
     private String userType;
-
-
 }

@@ -2,7 +2,9 @@ package no.fintlabs.controller;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fint.antlr.FintFilterService;
-import no.fintlabs.model.User;
+import no.fintlabs.dto.UserDTOforDetails;
+import no.fintlabs.dto.UserDTOforList;
+import no.fintlabs.user.User;
 import no.fintlabs.user.UserService;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.http.ResponseEntity;
@@ -29,21 +31,14 @@ public class UserController {
     }
 
     @GetMapping
-    public Flux<User> getAllUsers(@AuthenticationPrincipal Jwt jwt) {
-        log.info("Fetching all users");
-
-        return userService.getAllUsers(FintJwtEndUserPrincipal.from(jwt));
+    public Flux<UserDTOforList> getAllUserDTOforList(@AuthenticationPrincipal Jwt jwt){
+        log.info("Fetching all user DTOs");
+        return userService.getAllUsersDTOforList(FintJwtEndUserPrincipal.from(jwt));
     }
-
     @GetMapping({"/id/{id}"})
-    public Mono<User> getById(@AuthenticationPrincipal Jwt jwt,@PathVariable Long id ){
-        return userService.getUserById(id);
-    }
-
-    @GetMapping({"/resourceid/{id}"})
-    public Mono<User> getById(@AuthenticationPrincipal Jwt jwt,@PathVariable String id ){
-        log.info("ResourceId : " + id);
-        return userService.getUserByResourceId(id);
+    public Mono<UserDTOforDetails> getUserDTOforDetailsById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id){
+        log.info("Fetchind DTO for user by id");
+        return userService.getUserDTOforDetailsById(FintJwtEndUserPrincipal.from(jwt), id);
     }
 
 
@@ -67,21 +62,6 @@ public class UserController {
     }
 
 
-
-
-    @GetMapping("/allinone")
-    public ResponseEntity<Map<String,Object>> getUsersAllinone(
-            @AuthenticationPrincipal Jwt jwt,
-            @RequestParam(value = "$filter",defaultValue = "") String filter,
-            @RequestParam(value = "page",defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "3") int size ){
-
-        return userService.getFilteredAndPagedUsers(FintJwtEndUserPrincipal.from(jwt),filter,page,size);
-    }
-
-
-
-
     //TODO: erstattes av getUserbyfilter når fint-antlr støtter startsWith()
     @GetMapping("/startswith")
     public Flux<User> getAllUsersFirstnameStartingWith(@RequestParam("firstnamepart") String firstnamepart,
@@ -90,6 +70,5 @@ public class UserController {
         return userService.getAllUsersFirstnameStartingWith(FintJwtEndUserPrincipal.from(jwt), firstnamepart);
 
     }
-
 
 }
