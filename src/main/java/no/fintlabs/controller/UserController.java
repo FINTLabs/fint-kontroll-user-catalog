@@ -42,6 +42,7 @@ public class UserController {
     }
 
 
+
     @GetMapping(params = "$filter")
     public Flux<User> getUsersByFilter(@AuthenticationPrincipal Jwt jwt,
                                        @RequestParam(value = "$filter", required = false) String filter) {
@@ -52,6 +53,14 @@ public class UserController {
         return Flux.fromStream(filteredResult);
     }
 
+    @GetMapping("/employee")
+    public ResponseEntity<Map<String,Object>> getAllEmployeesPaged(@AuthenticationPrincipal Jwt jwt,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "3") int size){
+        log.info("Find all employees at page: " + page);
+        String userType = "EMPLOYEE";
+        return userService.getAllUserByTypePaged(FintJwtEndUserPrincipal.from(jwt),page,size, userType);
+    }
 
     @GetMapping("/pageing")
     public ResponseEntity<Map<String, Object>> getUsersPagable(@AuthenticationPrincipal Jwt jwt,

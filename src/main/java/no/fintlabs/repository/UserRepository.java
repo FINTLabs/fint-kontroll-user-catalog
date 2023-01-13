@@ -17,6 +17,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("select u from User u where upper(u.userType) = upper(?1)")
     List<User> findByUserType(String userType);
 
+    Page<User> findUsersByUserTypeEquals(Pageable pageable, String userType);
+
 
 
     @Query("select u from User u where upper(u.firstName) like upper(concat(:firstName, '%'))")
@@ -30,12 +32,12 @@ public interface UserRepository extends JpaRepository<User,Long> {
     @Query("select u from User u order by u.firstName")
     Page<User> findAllUsersPagable(Pageable pageable);
 
-    @Query("select u from User u where upper(u.resourceId) = upper(:resourceId)")
-    Optional<User> findByResourceId(@Param("resourceId") String resourceId);
 
     Optional<User> findByResourceIdContainingIgnoreCase(String resourceId);
 
-    //  List<User> findUsersByFirstNameIsStartingWithAndUserTypeIs
+    Optional<User> findUserByResourceIdEqualsIgnoreCase(String resourceId);
+
+
 
 
 

@@ -40,8 +40,7 @@ public class UserService {
 
     public User save(User user) {
         String userResourceId = user.getResourceId();
-        User existingUser = userRepository.findByResourceIdContainingIgnoreCase(userResourceId).orElse(null);
-
+        User existingUser = userRepository.findUserByResourceIdEqualsIgnoreCase(userResourceId).orElse(null);
         if (existingUser == null) {
             User newUser = userRepository.save(user);
             Member newMember = memberService.create(newUser);
@@ -63,17 +62,13 @@ public class UserService {
         return Flux.fromIterable(allUserDTOforList);
     }
 
+
+
     public Mono<UserDTOforDetails> getUserDTOforDetailsById(FintJwtEndUserPrincipal principal, Long id){
         return Mono.just(userRepository.findById(id)
                 .map(s->userDTOService.convertoDTOforDetails(s)).orElse(new UserDTOforDetails()));
     }
-    public Mono<User> getUserById(Long id) {
-        return Mono.just(userRepository.findById(id).orElse(new User()));
-    }
-    public Flux<User> getAllUsers(FintJwtEndUserPrincipal principal) {
-        List<User> allUsers = userRepository.findAll().stream().collect(Collectors.toList());
-        return Flux.fromIterable(allUsers);
-    }
+
 
     public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
         return userRepository.findAll().stream();
@@ -94,6 +89,16 @@ public class UserService {
         return createResponsForPaging(userDTOforListPage);
     }
 
+    public ResponseEntity<Map<String, Object>> getAllUserByTypePaged(FintJwtEndUserPrincipal principal,
+                                                                     int page,
+                                                                     int size,
+                                                                     String usertype) {
+        Pageable paging = PageRequest.of(page, size);
+        Page<UserDTOforList> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging,usertype)
+                .map(s-> userDTOService.convertToDTOforList(s));
+        return createResponsForPaging(userDTOforListPage);
+
+    }
 
     private ResponseEntity<Map<String, Object>> createResponsForPaging(Page<UserDTOforList> userPage) {
         List<UserDTOforList> content = userPage.getContent();
@@ -105,5 +110,6 @@ public class UserService {
         response.put("totalPages", userPage.getTotalPages());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+
 
 }
