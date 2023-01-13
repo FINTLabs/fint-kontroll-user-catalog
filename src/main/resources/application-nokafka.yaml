@@ -14,6 +14,7 @@ fint:
       load-test-users: true
       number-of-test-users: 10
       synthetic-user-token:
+
 spring:
   jpa:
     hibernate:
