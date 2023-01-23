@@ -14,36 +14,10 @@ import java.util.Optional;
 @Repository
 public interface UserRepository extends JpaRepository<User,Long> {
 
-    @Query("select u from User u where upper(u.userType) = upper(?1)")
-    List<User> findByUserType(String userType);
-
     Page<User> findUsersByUserTypeEquals(Pageable pageable, String userType);
-
-
 
     @Query("select u from User u where upper(u.firstName) like upper(concat(:firstName, '%'))")
     List<User> findAllUsersByStartingFirstnameWith(@Param("firstName") String firstName);
 
-    @Query("""
-            select u from User u
-            where upper(u.firstName) like upper(concat(:firstName, '%')) and upper(u.userType) = upper(:userType)""")
-    List<User> findUsersByFirstNamePartAndIsStudent(@Param("firstName") String firstName, @Param("userType") String userType);
-
-    @Query("select u from User u order by u.firstName")
-    Page<User> findAllUsersPagable(Pageable pageable);
-
-
-
-
-    Optional<User> findByResourceIdContainingIgnoreCase(String resourceId);
-
     Optional<User> findUserByResourceIdEqualsIgnoreCase(String resourceId);
-
-
-
-
-
-
-
-
 }
