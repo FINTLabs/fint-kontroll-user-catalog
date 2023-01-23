@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -55,49 +55,49 @@ public class UserService {
         }
     }
 
-
-    public Flux<UserDTOforList> getAllUsersDTOforList(FintJwtEndUserPrincipal principal){
-        List<UserDTOforList> allUserDTOforList = userRepository.findAll()
-                .stream().map(s->userDTOService.convertToDTOforList(s)).collect(Collectors.toList());
-        return Flux.fromIterable(allUserDTOforList);
-    }
-
-
-
-    public Mono<UserDTOforDetails> getUserDTOforDetailsById(FintJwtEndUserPrincipal principal, Long id){
+    public Mono<UserDTOforDetails> getUserDTOforDetailsById(
+            FintJwtEndUserPrincipal principal,
+            Long id){
         return Mono.just(userRepository.findById(id)
                 .map(s->userDTOService.convertoDTOforDetails(s)).orElse(new UserDTOforDetails()));
     }
 
 
-    public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
-        return userRepository.findAll().stream();
+    public ResponseEntity<Map<String, Object>> getAllUserDTOsPagedAndSorted(
+            FintJwtEndUserPrincipal principal,
+            int page,
+            int size) {
+
+        Pageable paging = PageRequest.of(page, size, Sort.by("firstName").ascending());
+        Page<UserDTOforList> userDTOforListPage;
+        userDTOforListPage = userRepository.findAll(paging)
+                .map(s->userDTOService.convertToDTOforList(s));
+
+        return createResponsForPaging(userDTOforListPage);
     }
+
+    public ResponseEntity<Map<String, Object>> getAllUserDTOsByTypePagedAndSorted(
+            FintJwtEndUserPrincipal principal,
+            int page,
+            int size,
+            String usertype) {
+
+        Pageable paging = PageRequest.of(page, size, Sort.by("firstName").ascending());
+        Page<UserDTOforList> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging,usertype)
+                .map(s-> userDTOService.convertToDTOforList(s));
+        return createResponsForPaging(userDTOforListPage);
+
+    }
+
+
 
     public Flux<User> getAllUsersFirstnameStartingWith(FintJwtEndUserPrincipal from, String firstnamepart) {
         List<User> allUsers = userRepository.findAllUsersByStartingFirstnameWith(firstnamepart);
         return Flux.fromIterable(allUsers);
     }
 
-    public ResponseEntity<Map<String, Object>> getAllUsersPaged(FintJwtEndUserPrincipal principal, int page, int size) {
-
-        Pageable paging = PageRequest.of(page, size);
-        Page<UserDTOforList> userDTOforListPage;
-        userDTOforListPage = userRepository.findAllUsersPagable(paging)
-                .map(s->userDTOService.convertToDTOforList(s));
-
-        return createResponsForPaging(userDTOforListPage);
-    }
-
-    public ResponseEntity<Map<String, Object>> getAllUserByTypePaged(FintJwtEndUserPrincipal principal,
-                                                                     int page,
-                                                                     int size,
-                                                                     String usertype) {
-        Pageable paging = PageRequest.of(page, size);
-        Page<UserDTOforList> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging,usertype)
-                .map(s-> userDTOService.convertToDTOforList(s));
-        return createResponsForPaging(userDTOforListPage);
-
+    public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
+        return userRepository.findAll().stream();
     }
 
     private ResponseEntity<Map<String, Object>> createResponsForPaging(Page<UserDTOforList> userPage) {

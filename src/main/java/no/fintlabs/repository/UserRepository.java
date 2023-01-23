@@ -33,6 +33,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Page<User> findAllUsersPagable(Pageable pageable);
 
 
+
+
     Optional<User> findByResourceIdContainingIgnoreCase(String resourceId);
 
     Optional<User> findUserByResourceIdEqualsIgnoreCase(String resourceId);
