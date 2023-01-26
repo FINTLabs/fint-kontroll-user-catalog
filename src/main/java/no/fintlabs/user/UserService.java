@@ -10,14 +10,10 @@ import no.fintlabs.member.MemberService;
 import no.fintlabs.repository.UserRepository;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.*;
@@ -86,20 +82,26 @@ public class UserService {
         Page<UserDTOforList> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging,usertype)
                 .map(s-> userDTOService.convertToDTOforList(s));
         return createResponsForPaging(userDTOforListPage);
-
     }
 
 
+    public ResponseEntity<Map<String,Object>> getAllUsersStream(FintJwtEndUserPrincipal principal,String filter,int page, int size) {
+        Pageable paging = PageRequest.of(page, size);
+        Stream<User> allUsers = userRepository.findAll().stream();
+        List<UserDTOforList> filteredDTOsForList = fintFilterService.from(allUsers, filter)
+                .map(s -> userDTOService.convertToDTOforList(s)).toList();
+        Page<UserDTOforList> pagedAndFilteredDTOsForList = fromListToPage(filteredDTOsForList,paging);
 
-    public Flux<User> getAllUsersFirstnameStartingWith(FintJwtEndUserPrincipal from, String firstnamepart) {
-        List<User> allUsers = userRepository.findAllUsersByStartingFirstnameWith(firstnamepart);
-        return Flux.fromIterable(allUsers);
+        return createResponsForPaging(pagedAndFilteredDTOsForList);
     }
 
-    public Stream<User> getAllUsersStream(FintJwtEndUserPrincipal principal) {
-        return userRepository.findAll().stream();
+    private Page<UserDTOforList> fromListToPage(List<UserDTOforList> list, Pageable paging) {
+        int start = (int) paging.getOffset();
+        int end = Math.min((start + paging.getPageSize()), list.size());
+        if(start > list.size())
+            return new PageImpl<>(new ArrayList<>(), paging, list.size());
+        return new PageImpl<>(list.subList(start, end), paging, list.size());
     }
-
     private ResponseEntity<Map<String, Object>> createResponsForPaging(Page<UserDTOforList> userPage) {
         List<UserDTOforList> content = userPage.getContent();
 
@@ -110,6 +112,4 @@ public class UserService {
         response.put("totalPages", userPage.getTotalPages());
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
-
-
 }
