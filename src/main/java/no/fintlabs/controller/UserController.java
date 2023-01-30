@@ -37,7 +37,7 @@ public class UserController {
                                                                @RequestParam(defaultValue = "1") int size) {
         if (size == 1){ size = pagesize;};
         log.info("Finding " +size+ " of all users at page: " + page);
-        return userService.getAllUserDTOsPagedAndSorted(FintJwtEndUserPrincipal.from(jwt), page, size);
+        return userService.getAllUserPagedAndSorted(FintJwtEndUserPrincipal.from(jwt), page, size);
     }
 
     @GetMapping({"/id/{id}"})
@@ -67,7 +67,7 @@ public class UserController {
         if (size==1){size=pagesize;};
         log.info("Finding " +size+ " of all students at page: " + page);
         String userType = "STUDENT";
-        return userService.getAllUserDTOsByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt),page,size,userType);
+        return userService.getAllUserByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt),page,size,userType);
     }
 
     @GetMapping({"/employees"})
@@ -77,6 +77,6 @@ public class UserController {
         if (size == 1){ size = pagesize;};
         log.info("Finding " +size+ " of all employees at page: " + page);
         String userType = "EMPLOYEE";
-        return userService.getAllUserDTOsByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt),page,size, userType);
+        return userService.getAllUserByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt),page,size, userType);
     }
 }
