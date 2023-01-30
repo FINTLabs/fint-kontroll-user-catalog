@@ -1,8 +1,8 @@
-package no.fintlabs.controller;
+package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fint.antlr.FintFilterService;
-import no.fintlabs.dto.UserDTOforDetails;
+import no.fintlabs.user.UserDetails;
 import no.fintlabs.user.UserService;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.beans.factory.annotation.Value;
@@ -41,7 +41,7 @@ public class UserController {
     }
 
     @GetMapping({"/id/{id}"})
-    public Mono<UserDTOforDetails> getUserDTOforDetailsById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id){
+    public Mono<UserDetails> getUserDTOforDetailsById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id){
         log.info("Fetchind DTO for user by id");
         return userService.getUserDTOforDetailsById(FintJwtEndUserPrincipal.from(jwt), id);
     }

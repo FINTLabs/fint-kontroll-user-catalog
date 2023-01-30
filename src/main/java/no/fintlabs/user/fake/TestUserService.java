@@ -1,12 +1,14 @@
-package no.fintlabs.user;
+package no.fintlabs.user.fake;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
 //import lombok.Value;
+import no.fintlabs.user.User;
+import no.fintlabs.user.UserService;
 import org.springframework.beans.factory.annotation.Value;
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.user.fakeUser.SynthUser;
+import no.fintlabs.user.fake.SynthUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;

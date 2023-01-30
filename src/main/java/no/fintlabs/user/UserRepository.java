@@ -1,4 +1,4 @@
-package no.fintlabs.repository;
+package no.fintlabs.user;
 
 import no.fintlabs.user.User;
 import org.springframework.data.domain.Page;

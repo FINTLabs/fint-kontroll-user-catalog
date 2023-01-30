@@ -1,5 +1,5 @@
 
-package no.fintlabs.user.fakeUser;
+package no.fintlabs.user.fake;
 
 import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;

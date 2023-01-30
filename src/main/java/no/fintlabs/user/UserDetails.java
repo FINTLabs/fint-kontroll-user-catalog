@@ -1,4 +1,4 @@
-package no.fintlabs.dto;
+package no.fintlabs.user;
 
 import lombok.*;
 
@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDTOforDetails {
+public class UserDetails {
     private Long id;
     private String fullName;
     private String userName;

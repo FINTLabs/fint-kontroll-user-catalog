@@ -2,11 +2,7 @@ package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fint.antlr.FintFilterService;
-import no.fintlabs.dto.UserDTOService;
-import no.fintlabs.dto.UserDTOforDetails;
-import no.fintlabs.dto.UserDTOforList;
 import no.fintlabs.member.MemberService;
-import no.fintlabs.repository.UserRepository;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
@@ -63,11 +59,11 @@ public class UserService {
         };
     }
 
-    public Mono<UserDTOforDetails> getUserDTOforDetailsById(
+    public Mono<UserDetails> getUserDTOforDetailsById(
             FintJwtEndUserPrincipal principal,
             Long id) {
         return Mono.just(userRepository.findById(id)
-                .map(userDTOService::convertoDTOforDetails).orElse(new UserDTOforDetails()));
+                .map(userDTOService::convertoDTOforDetails).orElse(new UserDetails()));
     }
 
 
@@ -77,7 +73,7 @@ public class UserService {
             int size) {
 
         Pageable paging = PageRequest.of(page, size, Sort.by("firstName").ascending());
-        Page<UserDTOforList> userDTOforListPage;
+        Page<UserSimple> userDTOforListPage;
         userDTOforListPage = userRepository.findAll(paging)
                 .map(userDTOService::convertToDTOforList);
 
@@ -91,7 +87,7 @@ public class UserService {
             String usertype) {
 
         Pageable paging = PageRequest.of(page, size, Sort.by("firstName").ascending());
-        Page<UserDTOforList> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging, usertype)
+        Page<UserSimple> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging, usertype)
                 .map(userDTOService::convertToDTOforList);
         return createResponsForPaging(userDTOforListPage);
     }
@@ -100,14 +96,14 @@ public class UserService {
     public ResponseEntity<Map<String, Object>> getAllUsersStream(FintJwtEndUserPrincipal principal, String filter, int page, int size) {
         Pageable paging = PageRequest.of(page, size);
         Stream<User> allUsers = userRepository.findAll().stream();
-        List<UserDTOforList> filteredDTOsForList = fintFilterService.from(allUsers, filter)
+        List<UserSimple> filteredDTOsForList = fintFilterService.from(allUsers, filter)
                 .map(userDTOService::convertToDTOforList).toList();
-        Page<UserDTOforList> pagedAndFilteredDTOsForList = fromListToPage(filteredDTOsForList, paging);
+        Page<UserSimple> pagedAndFilteredDTOsForList = fromListToPage(filteredDTOsForList, paging);
 
         return createResponsForPaging(pagedAndFilteredDTOsForList);
     }
 
-    private Page<UserDTOforList> fromListToPage(List<UserDTOforList> list, Pageable paging) {
+    private Page<UserSimple> fromListToPage(List<UserSimple> list, Pageable paging) {
         int start = (int) paging.getOffset();
         int end = Math.min((start + paging.getPageSize()), list.size());
         if (start > list.size())
@@ -115,8 +111,8 @@ public class UserService {
         return new PageImpl<>(list.subList(start, end), paging, list.size());
     }
 
-    private ResponseEntity<Map<String, Object>> createResponsForPaging(Page<UserDTOforList> userPage) {
-        List<UserDTOforList> content = userPage.getContent();
+    private ResponseEntity<Map<String, Object>> createResponsForPaging(Page<UserSimple> userPage) {
+        List<UserSimple> content = userPage.getContent();
 
         Map<String, Object> response = new HashMap<>();
         response.put("totalItems", userPage.getTotalElements());
@@ -124,5 +120,27 @@ public class UserService {
         response.put("currentPage", userPage.getNumber());
         response.put("totalPages", userPage.getTotalPages());
         return new ResponseEntity<>(response, HttpStatus.OK);
+    }
+
+    public UserSimple convertToDTOforList(User user){
+        return UserSimple
+                .builder()
+                .id(user.getId())
+                .fullName(user.getFirstName() + " " + user.getLastName())
+                .userType(user.getUserType())
+                .organisationUnitName(user.getOrganisationUnitName())
+                .build();
+    }
+
+    public UserDetails convertoDTOforDetails(User user){
+        return UserDetails
+                .builder()
+                .id(user.getId())
+                .fullName(user.getFirstName() +" "+ user.getLastName())
+                .userName(user.getUserName())
+                .organisationUnitName(user.getOrganisationUnitName())
+                .mobilePhone(user.getMobilePhone())
+                .email(user.getEmail())
+                .build();
     }
 }
