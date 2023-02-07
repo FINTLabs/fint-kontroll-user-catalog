@@ -3,12 +3,9 @@ package no.fintlabs.user;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.member.MemberService;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
-import org.springframework.data.domain.*;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import java.util.Map;
 import java.util.function.Consumer;
 
 
@@ -19,13 +16,10 @@ public class UserService {
 
     private final MemberService memberService;
 
-    private final ResponseFactory responseFactory;
 
-
-    public UserService(UserRepository userRepository, MemberService memberService, ResponseFactory responseFactory) {
+    public UserService(UserRepository userRepository, MemberService memberService) {
         this.userRepository = userRepository;
         this.memberService = memberService;
-        this.responseFactory = responseFactory;
     }
 
     public void save(User user) {
@@ -56,37 +50,7 @@ public class UserService {
             FintJwtEndUserPrincipal principal,
             Long id) {
         return Mono.just(userRepository.findById(id)
-                .map(UserFactory::toDetailedUser).orElse(new DetailedUser()));
+                .map(User::toDetailedUser).orElse(new DetailedUser()));
     }
-
-
-    public ResponseEntity<Map<String, Object>> getAllUserPagedAndSorted(
-            FintJwtEndUserPrincipal principal,
-            int page,
-            int size) {
-
-        Pageable paging = PageRequest.of(page, size, Sort.by("firstName").ascending());
-        Page<SimpleUser> userDTOforListPage;
-        userDTOforListPage = userRepository.findAll(paging)
-                .map(UserFactory::toSimpleUser);
-
-        return responseFactory.toResponseEntity(userDTOforListPage);
-    }
-
-    public ResponseEntity<Map<String, Object>> getAllUserByTypePagedAndSorted(
-            FintJwtEndUserPrincipal principal,
-            int page,
-            int size,
-            String usertype) {
-
-        Pageable paging = PageRequest.of(page, size, Sort.by("firstName").ascending());
-        Page<SimpleUser> userDTOforListPage = userRepository.findUsersByUserTypeEquals(paging, usertype)
-                .map(UserFactory::toSimpleUser);
-        return responseFactory.toResponseEntity(userDTOforListPage);
-    }
-
-
-
-
 
 }

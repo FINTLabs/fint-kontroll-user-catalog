@@ -11,11 +11,11 @@ public class MemberService {
         this.memberEntityProducerService = memberEntityProducerService;
     }
 
-    public void process(Member member){
+    public void process(Member member) {
         memberEntityProducerService.publish(member);
     }
 
-    public Member create(User user){
+    public Member create(User user) {
         return Member.builder()
                 .id(user.getId())
                 .resourceId(user.getResourceId())

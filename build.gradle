@@ -44,6 +44,7 @@ dependencies {
     implementation 'io.projectreactor:reactor-core'
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.modelmapper:modelmapper:3.1.1'
+    implementation 'io.springfox:springfox-boot-starter:3.0.0'
 
 
 

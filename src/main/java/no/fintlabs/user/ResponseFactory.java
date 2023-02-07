@@ -28,25 +28,14 @@ public class ResponseFactory {
     }
 
     public ResponseEntity<Map<String, Object>> toResponseEntity(FintJwtEndUserPrincipal principal, String filter, int page, int size) {
-
-        return toResponseEntity(principal, filter, null, page, size);
-//        return toResponseEntity(
-//                toPage(
-//                        fintFilterService
-//                                .from(userRepository.findAll().stream(), filter)
-//                                .map(UserFactory::toSimpleUser).toList(),
-//                        PageRequest.of(page, size)
-//                )
-//        );
-    }
-
-    public ResponseEntity<Map<String, Object>> toResponseEntity(FintJwtEndUserPrincipal principal, String filter, String userType, int page, int size) {
-        Stream<User> userStream = StringUtils.hasText(userType) ? userRepository.findUsersByUserTypeEquals(userType).stream() : userRepository.findAll().stream();
+        Stream<User> userStream = userRepository.findAll().stream();
         return toResponseEntity(
                 toPage(
-                        fintFilterService
+                        StringUtils.hasText(filter)
+                                ? fintFilterService
                                 .from(userStream, filter)
-                                .map(UserFactory::toSimpleUser).toList(),
+                                .map(User::toSimpleUser).toList()
+                                : userStream.map(User::toSimpleUser).toList(),
                         PageRequest.of(page, size)
                 )
         );

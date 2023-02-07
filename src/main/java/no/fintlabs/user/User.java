@@ -39,4 +39,26 @@ public class User {
     @Column(name="managerref")
     private  String managerRef;
 
+    public SimpleUser toSimpleUser() {
+        return SimpleUser
+                .builder()
+                .id(id)
+                .fullName(firstName + " " + lastName)
+                .userType(userType)
+                .organisationUnitName(organisationUnitName)
+                .build();
+    }
+
+    public DetailedUser toDetailedUser() {
+        return DetailedUser
+                .builder()
+                .id(id)
+                .fullName(firstName + " " + lastName)
+                .userName(userName)
+                .organisationUnitName(organisationUnitName)
+                .mobilePhone(mobilePhone)
+                .email(email)
+                .build();
+    }
+
 }

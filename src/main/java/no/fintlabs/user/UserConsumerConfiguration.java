@@ -15,19 +15,17 @@ public class UserConsumerConfiguration {
     public ConcurrentMessageListenerContainer<String, User> userConsumer(
             UserService userService,
             EntityConsumerFactoryService entityConsumerFactoryService
-    ){
+    ) {
         EntityTopicNameParameters entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
                 .resource("user")
                 .build();
 
-        ConcurrentMessageListenerContainer container = entityConsumerFactoryService.createFactory(
-                User.class,
-                (ConsumerRecord<String,User> consumerRecord)
-                -> userService.save(consumerRecord.value()))
-                        .createContainer(entityTopicNameParameters);
-
-        return container;
+        return entityConsumerFactoryService.createFactory(
+                        User.class,
+                        (ConsumerRecord<String, User> consumerRecord)
+                                -> userService.save(consumerRecord.value()))
+                .createContainer(entityTopicNameParameters);
 
     }
 
