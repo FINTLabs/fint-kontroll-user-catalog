@@ -1,4 +1,4 @@
-package no.fintlabs.user;
+package no.fintlabs.user.fake;
 
 
 import com.fasterxml.jackson.annotation.JsonProperty;

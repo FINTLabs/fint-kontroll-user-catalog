@@ -1,11 +1,11 @@
-package no.fintlabs.dto;
+package no.fintlabs.user;
 
 import lombok.*;
 
 @Getter
 @Setter
 @Builder
-public class UserDTOforList {
+public class SimpleUser {
 
     private Long id;
     private String fullName;
