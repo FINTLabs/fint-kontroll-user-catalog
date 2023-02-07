@@ -3,12 +3,10 @@ package no.fintlabs.user.fake;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.netty.channel.ChannelOption;
-//import lombok.Value;
+import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.user.User;
 import no.fintlabs.user.UserService;
 import org.springframework.beans.factory.annotation.Value;
-import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.user.fake.SynthUser;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Service;
@@ -25,7 +23,6 @@ import java.util.UUID;
 
 @Slf4j
 @ConditionalOnProperty(value = "fint.kontroll.user-catalog.load-test-users", havingValue = "true")
-//@PropertySource("classpath:application-nokafka.yaml")
 @Service
 public class TestUserService {
     private final UserService userService;
@@ -57,9 +54,7 @@ public class TestUserService {
     }
 
 
-
-    private static String getRandomUserType()
-    {
+    private static String getRandomUserType() {
         Random random = new Random();
         List<String> list = new ArrayList<>();
         list.add("EMPLOYEE");
@@ -72,11 +67,10 @@ public class TestUserService {
     public void init() throws JsonProcessingException, InterruptedException {
 
 
-
         for (int i = 0; i < numberOfTestUsers; i++) {
 
             String response = webClient.get()
-                    .uri("api/contact-generator?localization=no_NO&token="+synthUserToken)
+                    .uri("api/contact-generator?localization=no_NO&token=" + synthUserToken)
                     .retrieve()
                     .bodyToMono(String.class)
                     //.map(s -> log.info(s))
@@ -86,16 +80,16 @@ public class TestUserService {
             log.info("{}", synthUser);
 
             userService.save(User.builder()
-                            .resourceId("https://beta.felleskomponent.no/administrasjon/personal/personalressurs/ansattnummer/"
+                    .resourceId("https://beta.felleskomponent.no/administrasjon/personal/personalressurs/ansattnummer/"
                             + synthUser.getSsn())
-                            .firstName(synthUser.getFirstname())
-                            .lastName(synthUser.getLastname())
-                            .userType(getRandomUserType())
-                            .userName(synthUser.getOnline().getUsername())
-                            .identityProviderUserObjectId(UUID.randomUUID())
-                            .mobilePhone(synthUser.getPhoneNumber())
-                            .email(synthUser.getOnline().getEmail())
-                            .managerRef("https://beta.felleskomponent.no/administrasjon/personal/personalressurs/ansattnummer/111-22-3333")
+                    .firstName(synthUser.getFirstname())
+                    .lastName(synthUser.getLastname())
+                    .userType(getRandomUserType())
+                    .userName(synthUser.getOnline().getUsername())
+                    .identityProviderUserObjectId(UUID.randomUUID())
+                    .mobilePhone(synthUser.getPhoneNumber())
+                    .email(synthUser.getOnline().getEmail())
+                    .managerRef("https://beta.felleskomponent.no/administrasjon/personal/personalressurs/ansattnummer/111-22-3333")
                     .build());
 
             Thread.sleep(1000);
@@ -103,7 +97,6 @@ public class TestUserService {
 
 
     }
-
 
 
 }

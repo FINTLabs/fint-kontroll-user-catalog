@@ -5,7 +5,7 @@ import lombok.*;
 @Getter
 @Setter
 @Builder
-public class UserSimple {
+public class SimpleUser {
 
     private Long id;
     private String fullName;

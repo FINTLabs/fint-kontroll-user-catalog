@@ -1,9 +1,6 @@
 package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fint.antlr.FintFilterService;
-import no.fintlabs.user.UserDetails;
-import no.fintlabs.user.UserService;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -20,63 +17,98 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
-    private final FintFilterService fintFilterService;
 
-    public UserController(UserService userService, FintFilterService fintFilterService) {
+    private final ResponseFactory responseFactory;
+
+    public UserController(UserService userService, ResponseFactory responseFactory) {
         this.userService = userService;
-        this.fintFilterService = fintFilterService;
+        this.responseFactory = responseFactory;
     }
 
     @Value("${fint.kontroll.user-catalog.pagesize}")
-    int pagesize;
+    int pageSize;
 
-
+    .
     @GetMapping
-    public ResponseEntity<Map<String, Object>> getUsersPagable(@AuthenticationPrincipal Jwt jwt,
-                                                               @RequestParam(defaultValue = "0") int page,
-                                                               @RequestParam(defaultValue = "1") int size) {
-        if (size == 1){ size = pagesize;};
-        log.info("Finding " +size+ " of all users at page: " + page);
-        return userService.getAllUserPagedAndSorted(FintJwtEndUserPrincipal.from(jwt), page, size);
-    }
+    public ResponseEntity<Map<String, Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
+                                                        @RequestParam(value = "$filter", required = false) String filter,
+                                                        @RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize}") int size) {
+//        if (size == 1) {
+//            size = pageSize;
+//        }
 
-    @GetMapping({"/id/{id}"})
-    public Mono<UserDetails> getUserDTOforDetailsById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id){
-        log.info("Fetchind DTO for user by id");
-        return userService.getUserDTOforDetailsById(FintJwtEndUserPrincipal.from(jwt), id);
-    }
+        log.info("Finding " + size + " of all users at page: " + page);
 
-
-    @GetMapping("/filter")
-    public ResponseEntity<Map<String, Object>> getUsersByFilter(@AuthenticationPrincipal Jwt jwt,
-                                                                @RequestParam(value = "$filter", required = false) String filter,
-                                                                @RequestParam(defaultValue = "0") int page,
-                                                                @RequestParam(defaultValue = "1") int size) {
-        if (size==1){size=pagesize;};
-        log.info("Finding all users with filter : " + filter);
-
-        return userService.getAllUsersStream(
+        return responseFactory.toResponseEntity(
                 FintJwtEndUserPrincipal.from(jwt),
-                filter,page,size);
+                filter, page, size);
+        //return userService.getAllUserPagedAndSorted(FintJwtEndUserPrincipal.from(jwt), page, size);
     }
+
+    @GetMapping({"{id}"})
+    public Mono<DetailedUser> getUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+        log.info("Fetching user by id");
+        return userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
+    }
+
+
+//    @GetMapping("/filter")
+//    public ResponseEntity<Map<String, Object>> getUsersByFilter(@AuthenticationPrincipal Jwt jwt,
+//                                                                @RequestParam(value = "$filter", required = false) String filter,
+//                                                                @RequestParam(defaultValue = "0") int page,
+//                                                                @RequestParam(defaultValue = "1") int size) {
+//        if (size == 1) {
+//            size = pageSize;
+//        }
+//        ;
+//        log.info("Finding all users with filter : " + filter);
+//
+//        return responseFactory.toResponseEntity(
+//                FintJwtEndUserPrincipal.from(jwt),
+//                filter, page, size);
+//    }
 
     @GetMapping({"/students"})
-    public ResponseEntity<Map<String,Object>> getAllStudentsPaged(@AuthenticationPrincipal Jwt jwt,
-                                                                  @RequestParam(defaultValue = "0") int page,
-                                                                  @RequestParam(defaultValue = "1") int size){
-        if (size==1){size=pagesize;};
-        log.info("Finding " +size+ " of all students at page: " + page);
-        String userType = "STUDENT";
-        return userService.getAllUserByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt),page,size,userType);
+    public ResponseEntity<Map<String, Object>> getAllStudentsPaged(@AuthenticationPrincipal Jwt jwt,
+                                                                   @RequestParam(value = "$filter", required = false) String filter,
+                                                                   @RequestParam(defaultValue = "0") int page,
+                                                                   @RequestParam(defaultValue = "1") int size) {
+        if (size == 1) {
+            size = pageSize;
+        }
+        ;
+        log.info("Finding " + size + " of all students at page: " + page);
+
+        return responseFactory.toResponseEntity(
+                FintJwtEndUserPrincipal.from(jwt),
+                filter,
+                "STUDENT",
+                page,
+                size
+        );
+        //String userType = "STUDENT";
+        //return userService.getAllUserByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt), page, size, userType);
     }
 
     @GetMapping({"/employees"})
-    public ResponseEntity<Map<String,Object>> getAllEmployeesPaged(@AuthenticationPrincipal Jwt jwt,
-                                                                   @RequestParam(defaultValue = "0") int page,
-                                                                   @RequestParam (defaultValue = "1") int size){
-        if (size == 1){ size = pagesize;};
-        log.info("Finding " +size+ " of all employees at page: " + page);
-        String userType = "EMPLOYEE";
-        return userService.getAllUserByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt),page,size, userType);
+    public ResponseEntity<Map<String, Object>> getAllEmployeesPaged(@AuthenticationPrincipal Jwt jwt,
+                                                                    @RequestParam(value = "$filter", required = false) String filter,
+                                                                    @RequestParam(defaultValue = "0") int page,
+                                                                    @RequestParam(defaultValue = "1") int size) {
+        if (size == 1) {
+            size = pageSize;
+        }
+
+        log.info("Finding " + size + " of all employees at page: " + page);
+        return responseFactory.toResponseEntity(
+                FintJwtEndUserPrincipal.from(jwt),
+                filter,
+                "EMPLOYEE",
+                page,
+                size
+        );
+//        String userType = "EMPLOYEE";
+//        return userService.getAllUserByTypePagedAndSorted(FintJwtEndUserPrincipal.from(jwt), page, size, userType);
     }
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class UserDetails {
+public class DetailedUser {
     private Long id;
     private String fullName;
     private String userName;
