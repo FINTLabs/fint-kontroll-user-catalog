@@ -30,7 +30,7 @@ public class UserController {
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size) {
 
-        log.info("Finding " + size + " of all users at page: " + page);
+        log.info("Finding users with filter: " + filter + " at page: " + page + " (first page = 0)" );
 
         return responseFactory.toResponseEntity(
                 FintJwtEndUserPrincipal.from(jwt),
@@ -39,7 +39,7 @@ public class UserController {
 
     @GetMapping({"{id}"})
     public Mono<DetailedUser> getUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
-        log.info("Fetching user by id");
+        log.info("Fetching user by id: " + id);
         return userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
     }
 }

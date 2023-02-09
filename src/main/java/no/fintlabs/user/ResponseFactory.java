@@ -29,7 +29,7 @@ public class ResponseFactory {
 
     public ResponseEntity<Map<String, Object>> toResponseEntity(FintJwtEndUserPrincipal principal, String filter, int page, int size) {
         Stream<User> userStream = userRepository.findAll().stream();
-        return toResponseEntity(
+        ResponseEntity<Map<String, Object>> entity = toResponseEntity(
                 toPage(
                         StringUtils.hasText(filter)
                                 ? fintFilterService
@@ -39,6 +39,8 @@ public class ResponseFactory {
                         PageRequest.of(page, size)
                 )
         );
+
+        return entity;
     }
 
     private Page<SimpleUser> toPage(List<SimpleUser> list, Pageable paging) {
