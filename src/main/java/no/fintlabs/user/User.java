@@ -4,6 +4,8 @@ import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -30,8 +32,14 @@ public class User {
     private String userName;
     @Column(name = "identityprovideruserobjectid")
     private UUID identityProviderUserObjectId;
-    @Column(name="organisationunitname")
-    private String organisationUnitName;
+    private String mainOrganisationUnitName;
+    private String mainOrganisationUnitId;
+    @ElementCollection
+    private List<String> organisationUnitIds = new ArrayList<>();
+
+
+//    @Column(name="organisationunitname")
+//    private String organisationUnitName;
     @Column(name="mobilephone")
     private String mobilePhone;
     @Column(name ="email")
@@ -45,7 +53,7 @@ public class User {
                 .id(id)
                 .fullName(firstName + " " + lastName)
                 .userType(userType)
-                .organisationUnitName(organisationUnitName)
+                .organisationUnitName(mainOrganisationUnitName)
                 .build();
     }
 
@@ -55,7 +63,7 @@ public class User {
                 .id(id)
                 .fullName(firstName + " " + lastName)
                 .userName(userName)
-                .organisationUnitName(organisationUnitName)
+                .organisationUnitName(mainOrganisationUnitName)
                 .mobilePhone(mobilePhone)
                 .email(email)
                 .build();
