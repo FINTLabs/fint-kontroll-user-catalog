@@ -32,7 +32,9 @@ public class User {
     private String userName;
     @Column(name = "identityprovideruserobjectid")
     private UUID identityProviderUserObjectId;
+    @Column(name="mainorganisationunitname")
     private String mainOrganisationUnitName;
+    @Column(name="mainorganisationunitid")
     private String mainOrganisationUnitId;
     @ElementCollection
     private List<String> organisationUnitIds = new ArrayList<>();

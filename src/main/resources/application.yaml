@@ -20,21 +20,22 @@ fint:
     user-catalog:
       pagesize: 20
 spring:
-  kafka:
-    consumer:
-      group-id: ${fint.application-id}
-  jpa:
-    properties:
-      hibernate:
-        jdbc:
-          lob:
-            non_contextual_creation: true
-        dialect: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      ddl-auto: validate
-    datasource:
-      driver-class-name: org.postgresql.Driver
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
+      client:
+        provider:
+          fint-idp:
+            token-uri: https://idp.felleskomponent.no/nidp/oauth/nam/token
+        registration:
+          fint:
+            authorization-grant-type: password
+            client-id:
+            client-secret:
+            provider: fint-idp
+            scope: fint-client
 logging:
   level:
     root: INFO
