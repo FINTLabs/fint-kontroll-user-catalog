@@ -10,7 +10,7 @@ class UserSpec extends Specification {
         .id(1000L)
         .firstName("firstname")
         .lastName("lastname")
-        .organisationUnitName("org")
+        .mainOrganisationUnitName("org")
         .userType("userType")
                 .build()
 
@@ -20,7 +20,7 @@ class UserSpec extends Specification {
         then:
         simpleUser.getFullName().endsWith(user.getLastName())
         simpleUser.getId() == user.getId()
-        simpleUser.getOrganisationUnitName() == user.getOrganisationUnitName()
+        simpleUser.getOrganisationUnitName() == user.getMainOrganisationUnitName()
         simpleUser.getUserType() == user.getUserType()
 
     }
