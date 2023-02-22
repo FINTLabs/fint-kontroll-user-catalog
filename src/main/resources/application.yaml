@@ -18,7 +18,7 @@ fint:
     registration-id: fint
   kontroll:
     user-catalog:
-      pagesize: 20
+      pagesize: 100
 spring:
   security:
     oauth2:

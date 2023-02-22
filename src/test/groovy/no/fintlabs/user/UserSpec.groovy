@@ -24,4 +24,28 @@ class UserSpec extends Specification {
         simpleUser.getUserType() == user.getUserType()
 
     }
+
+    def "Converting a User to detailed user with values from the User"(){
+        given:
+        def user = User.builder()
+        .id(4711L)
+        .firstName("firstname")
+        .lastName("lastname")
+        .userName("brukernavn@org.no")
+        .mainOrganisationUnitName("orgenheten")
+        .userType("EMPLOYEE")
+        .mobilePhone("12345678")
+        .email("brukernavn@org.no")
+        .build()
+
+        when:
+        def detaildUser = user.toDetailedUser()
+
+        then:
+        detaildUser.getFullName().endsWith(user.getLastName())
+        detaildUser.getUserName() == user.getUserName()
+        detaildUser.getOrganisationUnitName() == user.getMainOrganisationUnitName()
+        detaildUser.getMobilePhone() == user.getMobilePhone()
+        detaildUser.getEmail() == user.getEmail()
+    }
 }

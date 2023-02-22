@@ -27,7 +27,11 @@ public class ResponseFactory {
         this.userRepository = userRepository;
     }
 
-    public ResponseEntity<Map<String, Object>> toResponseEntity(FintJwtEndUserPrincipal principal, String filter, int page, int size) {
+    public ResponseEntity<Map<String, Object>> toResponseEntity(
+            FintJwtEndUserPrincipal principal,
+            String filter,
+            int page,
+            int size) {
         Stream<User> userStream = userRepository.findAll().stream();
         ResponseEntity<Map<String, Object>> entity = toResponseEntity(
                 toPage(
