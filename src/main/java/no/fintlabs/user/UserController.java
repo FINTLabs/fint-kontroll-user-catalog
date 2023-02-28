@@ -10,6 +10,9 @@ import reactor.core.publisher.Mono;
 
 import java.util.Map;
 
+import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
+import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/users")
@@ -24,7 +27,7 @@ public class UserController {
         this.responseFactory = responseFactory;
     }
 
-    @GetMapping
+    @GetMapping(produces = APPLICATION_JSON_VALUE )
     public ResponseEntity<Map<String, Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
                                                         @RequestParam(value = "$filter", required = false) String filter,
                                                         @RequestParam(defaultValue = "0") int page,
