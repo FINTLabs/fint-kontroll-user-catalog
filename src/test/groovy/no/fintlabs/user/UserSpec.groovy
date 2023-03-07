@@ -11,6 +11,7 @@ class UserSpec extends Specification {
         .firstName("firstname")
         .lastName("lastname")
         .mainOrganisationUnitName("org")
+        .mainOrganisationUnitId("1234")
         .userType("userType")
                 .build()
 
@@ -21,6 +22,7 @@ class UserSpec extends Specification {
         simpleUser.getFullName().endsWith(user.getLastName())
         simpleUser.getId() == user.getId()
         simpleUser.getOrganisationUnitName() == user.getMainOrganisationUnitName()
+        simpleUser.getOrganisationUnitId() == user.getMainOrganisationUnitId()
         simpleUser.getUserType() == user.getUserType()
 
     }

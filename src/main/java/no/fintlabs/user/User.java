@@ -56,6 +56,7 @@ public class User {
                 .fullName(firstName + " " + lastName)
                 .userType(userType)
                 .organisationUnitName(mainOrganisationUnitName)
+                .organisationUnitId(mainOrganisationUnitId)
                 .build();
     }
 
