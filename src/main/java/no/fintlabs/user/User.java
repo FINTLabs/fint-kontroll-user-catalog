@@ -39,9 +39,6 @@ public class User {
     @ElementCollection
     private List<String> organisationUnitIds = new ArrayList<>();
 
-
-//    @Column(name="organisationunitname")
-//    private String organisationUnitName;
     @Column(name="mobilephone")
     private String mobilePhone;
     @Column(name ="email")
