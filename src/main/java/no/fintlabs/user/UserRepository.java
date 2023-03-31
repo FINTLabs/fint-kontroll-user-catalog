@@ -43,5 +43,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
             """)
     List<User> findUsersByNameType(String firstName, String lastName,String userType);
 
+    @Query("""
+            select u from User u
+            where
+                upper(u.firstName || ' ' || u.lastName) like upper(concat('%', ?1, '%'))
+            """)
+    List<User> findUsersByName(String firstName, String lastName);
+
 
 }
