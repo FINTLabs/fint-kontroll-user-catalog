@@ -6,6 +6,7 @@ import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 
@@ -51,6 +52,18 @@ public class UserService {
             Long id) {
         return Mono.just(userRepository.findById(id)
                 .map(User::toDetailedUser).orElse(new DetailedUser()));
+    }
+
+
+    public List<SimpleUser> getSimpleUsers(
+            FintJwtEndUserPrincipal principal,
+            String search,
+            List<String> orgUnits,
+            String userType ) {
+
+
+
+        return null;
     }
 
 }

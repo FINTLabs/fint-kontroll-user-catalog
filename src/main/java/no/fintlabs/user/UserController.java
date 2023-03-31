@@ -8,6 +8,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED_VALUE;
@@ -38,6 +39,18 @@ public class UserController {
         return responseFactory.toResponseEntity(
                 FintJwtEndUserPrincipal.from(jwt),
                 filter, page, size);
+    }
+
+    public ResponseEntity<Map<String,Object>> getU(@AuthenticationPrincipal Jwt jwt,
+                                                   @RequestParam() String search,
+                                                   @RequestParam()List<String> orgUnits,
+                                                   @RequestParam() String userType,
+                                                   @RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
+                                                   ){
+
+
+        return null;
     }
 
     @GetMapping({"{id}"})
