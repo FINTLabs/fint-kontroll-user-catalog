@@ -41,16 +41,17 @@ public class UserController {
                 filter, page, size);
     }
 
+    @GetMapping("/test")
     public ResponseEntity<Map<String,Object>> getU(@AuthenticationPrincipal Jwt jwt,
-                                                   @RequestParam() String search,
-                                                   @RequestParam()List<String> orgUnits,
-                                                   @RequestParam() String userType,
+                                                   @RequestParam(value = "search",defaultValue = "%") String search,
+                                                   @RequestParam(value = "orgUnits",required = false)List<String> orgUnits,
+                                                   @RequestParam(value = "userType", defaultValue = "ALLTYPES") String userType,
                                                    @RequestParam(defaultValue = "0") int page,
                                                    @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
                                                    ){
 
-
-        return null;
+        log.info("Finding users with search: " + search + " in orgunits: " + orgUnits + " with UserType: " + userType);
+        return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,orgUnits,userType,page,size);
     }
 
     @GetMapping({"{id}"})

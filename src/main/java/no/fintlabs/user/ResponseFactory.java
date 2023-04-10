@@ -21,10 +21,12 @@ public class ResponseFactory {
 
     private final FintFilterService fintFilterService;
     private final UserRepository userRepository;
+    private final UserService userService;
 
-    public ResponseFactory(FintFilterService fintFilterService, UserRepository userRepository) {
+    public ResponseFactory(FintFilterService fintFilterService, UserRepository userRepository, UserService userService) {
         this.fintFilterService = fintFilterService;
         this.userRepository = userRepository;
+        this.userService = userService;
     }
 
     public ResponseEntity<Map<String, Object>> toResponseEntity(
@@ -43,17 +45,22 @@ public class ResponseFactory {
                         PageRequest.of(page, size)
                 )
         );
-
         return entity;
     }
 
-    private Page<SimpleUser> toPage(List<SimpleUser> list, Pageable paging) {
-        int start = (int) paging.getOffset();
-        int end = Math.min((start + paging.getPageSize()), list.size());
+    public ResponseEntity<Map<String,Object>> toResponseEntity(
+            FintJwtEndUserPrincipal principal,
+            String search,
+            List<String> orgUnits,
+            String userType,
+            int page,
+            int size
+    ) {
+        List<SimpleUser> simpleUsers = userService.getSimpleUsers(principal,search,orgUnits,userType);
+        ResponseEntity<Map<String,Object>> entity = toResponseEntity(
+                toPage(simpleUsers,PageRequest.of(page, size)));
 
-        return start > list.size()
-                ? new PageImpl<>(new ArrayList<>(), paging, list.size())
-                : new PageImpl<>(list.subList(start, end), paging, list.size());
+        return entity;
     }
 
     public ResponseEntity<Map<String, Object>> toResponseEntity(Page<SimpleUser> userPage) {
@@ -67,4 +74,15 @@ public class ResponseFactory {
                 HttpStatus.OK
         );
     }
+
+    private Page<SimpleUser> toPage(List<SimpleUser> list, Pageable paging) {
+        int start = (int) paging.getOffset();
+        int end = Math.min((start + paging.getPageSize()), list.size());
+
+        return start > list.size()
+                ? new PageImpl<>(new ArrayList<>(), paging, list.size())
+                : new PageImpl<>(list.subList(start, end), paging, list.size());
+    }
+
+
 }

@@ -6,6 +6,7 @@ import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -61,9 +62,39 @@ public class UserService {
             List<String> orgUnits,
             String userType ) {
 
+        List<User> users;
 
 
-        return null;
+        if ( (orgUnits == null ) && !(userType.equals("ALLTYPES") )){
+            users = userRepository.findUsersByNameType(search,userType);
+            return users
+                    .stream()
+                    .map(User::toSimpleUser)
+                    .toList();
+        }
+
+        if ((orgUnits != null ) && (userType.equals("ALLTYPES"))){
+            users = userRepository.findUsersByNameOrg(search,orgUnits);
+            return users
+                    .stream()
+                    .map(User::toSimpleUser)
+                    .toList();
+        }
+
+        if ((orgUnits == null ) && (userType.equals("ALLTYPES")  )){
+            users = userRepository.findUsersByName(search);
+            return users
+                    .stream()
+                    .map(User::toSimpleUser)
+                    .toList();
+        }
+
+
+        users = userRepository.findUsersByNameOrgType(search,orgUnits,userType);
+        return users
+                .stream()
+                .map(User::toSimpleUser)
+                .toList();
     }
 
 }
