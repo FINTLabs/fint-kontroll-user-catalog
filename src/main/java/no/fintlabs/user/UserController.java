@@ -28,8 +28,8 @@ public class UserController {
         this.responseFactory = responseFactory;
     }
 
-    @GetMapping(produces = APPLICATION_JSON_VALUE )
-    public ResponseEntity<Map<String, Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
+    //@GetMapping(produces = APPLICATION_JSON_VALUE )
+    public ResponseEntity<Map<String, Object>> getUsersUsingOdata(@AuthenticationPrincipal Jwt jwt,
                                                         @RequestParam(value = "$filter", required = false) String filter,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size) {
@@ -41,8 +41,8 @@ public class UserController {
                 filter, page, size);
     }
 
-    @GetMapping("/test")
-    public ResponseEntity<Map<String,Object>> getU(@AuthenticationPrincipal Jwt jwt,
+    @GetMapping()
+    public ResponseEntity<Map<String,Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
                                                    @RequestParam(value = "search",defaultValue = "%") String search,
                                                    @RequestParam(value = "orgUnits",required = false)List<String> orgUnits,
                                                    @RequestParam(value = "userType", defaultValue = "ALLTYPES") String userType,
