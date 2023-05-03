@@ -7,6 +7,11 @@ spec:
   orgId: fintlabs.no
   image: ghcr.io/fintlabs/fint-kontroll-user-catalog:latest
   imagePullPolicy: Always
+  url:
+    hostname: kontroll.vigoiks.no
+    basePath: /alpha/fintlabs-no/api/users
+    ingress:
+      enabled: true
   kafka:
     enabled: true
     acls:
