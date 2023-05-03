@@ -10,8 +10,8 @@ spec:
   url:
     hostname: kontroll.vigoiks.no
     basePath: /alpha/fintlabs-no/api/users
-    ingress:
-      enabled: true
+  ingress:
+    enabled: true
   kafka:
     enabled: true
     acls:
