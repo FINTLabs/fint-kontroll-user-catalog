@@ -1,8 +1,6 @@
 create table user_organisation_unit_ids
 (
-    user_id               bigint not null
-        constraint fkiodmrttou42ofbfdq67140yko
-            references users,
+    user_id               bigint not null,
     organisation_unit_ids varchar(255)
 );
 
@@ -19,9 +17,13 @@ create table users
     mainorganisationunitname     varchar(255),
     managerref                   varchar(255),
     mobilephone                  varchar(255),
-    resourceid                   varchar(255)
-        constraint uk_tmnk5grfniihp9dwd7fbo9otu
-            unique,
+    resourceid                   varchar(255),
+
     username                     varchar(255),
     usertype                     varchar(255)
 );
+
+alter table user_organisation_unit_ids
+    add constraint fkiodmrttou42ofbfdq67140yko foreign key (user_id) references users;
+alter table users
+    add constraint uk_tmnk5grfniihp9dwd7fbo9otu unique (resourceid);
