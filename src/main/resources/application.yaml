@@ -1,21 +1,12 @@
 fint:
+  org-id: ''
   application-id: fint-kontroll-user-catalog
   cache:
     defaultCacheEntryTimeToLiveMillis: 518400000
     defaultCacheHeapSize: 1000000
-  kafka:
-    topic:
-      org-id: ${fint.org-id}
-      domain-context: kontroll
-    application-id: ${fint.application-id}
   integration:
     service:
       authorized-role: https://role-catalog.vigoiks.no/vigo/samtykke/user
-  client:
-    password: ''
-    username: ''
-    base-url: https://beta.felleskomponent.no
-    registration-id: fint
   kontroll:
     user-catalog:
       pagesize: 50
@@ -25,17 +16,11 @@ spring:
       resourceserver:
         jwt:
           issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
-      client:
-        provider:
-          fint-idp:
-            token-uri: https://idp.felleskomponent.no/nidp/oauth/nam/token
-        registration:
-          fint:
-            authorization-grant-type: password
-            client-id:
-            client-secret:
-            provider: fint-idp
-            scope: fint-client
+  profiles:
+    include:
+      - kontroll-kafka
+      - kontroll-postgres
+      - kontroll-schema-generation
 logging:
   level:
     root: INFO
