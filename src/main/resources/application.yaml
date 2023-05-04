@@ -1,5 +1,4 @@
 fint:
-  org-id: ''
   application-id: fint-kontroll-user-catalog
   cache:
     defaultCacheEntryTimeToLiveMillis: 518400000
