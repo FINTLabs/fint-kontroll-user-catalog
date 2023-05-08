@@ -9,10 +9,10 @@ spec:
   imagePullPolicy: Always
   url:
     hostname: kontroll.vigoiks.no
-    basePath: /alpha/fintlabs-no
+    basePath: /beta/fintlabs-no
   ingress:
     enabled: true
-    basePath: /alpha/fintlabs-no/api/users
+    basePath: /beta/fintlabs-no/api/users
   kafka:
     enabled: true
     acls:
