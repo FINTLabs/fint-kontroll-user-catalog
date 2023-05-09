@@ -36,6 +36,7 @@ public class UserService {
     private Runnable onSaveNewUser(User user) {
         return () -> {
             User newUser = userRepository.save(user);
+            log.info("Create new user: "+ user.getId());
             memberService.process(memberService.create(newUser));
         };
     }
@@ -43,6 +44,7 @@ public class UserService {
     private Consumer<User> onSaveExistingUser(User user) {
         return existingUser -> {
             user.setId(existingUser.getId());
+            log.info("Update user: "+ user.getId());
             memberService.process(memberService.create(user));
             userRepository.save(user);
         };
