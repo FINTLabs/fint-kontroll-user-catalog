@@ -13,6 +13,8 @@ spec:
   ingress:
     enabled: true
     basePath: /beta/fintlabs-no/api/users
+    middlewares:
+      - fint-kontroll-sso
   kafka:
     enabled: true
     acls:
