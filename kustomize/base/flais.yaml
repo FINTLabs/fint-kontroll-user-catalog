@@ -23,4 +23,4 @@ spec:
       - topic: 'fintlabs-no.kontroll.*'
         permission: admin
   database:
-    enabled: true
+    database: fint-kontroll

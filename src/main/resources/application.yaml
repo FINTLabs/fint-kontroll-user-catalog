@@ -17,9 +17,8 @@ spring:
           issuer-uri: https://idp.felleskomponent.no/nidp/oauth/nam
   profiles:
     include:
-      - kontroll-kafka
-      - kontroll-postgres
-      - kontroll-schema-generation
+      - kafka
+      - db
 logging:
   level:
     root: INFO
