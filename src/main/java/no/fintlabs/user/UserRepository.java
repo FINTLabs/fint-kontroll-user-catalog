@@ -22,6 +22,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 upper(u.firstName || ' ' || u.lastName) like upper(concat('%', ?1, '%'))
                 and u.mainOrganisationUnitId in ?2
                 and u.userType = ?3
+            order by u.lastName, u.firstName
             """)
     List<User> findUsersByNameOrgType(String searchName, Collection<String> mainOrganisationUnitIds, String userType);
 
@@ -31,6 +32,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             where
                 upper(u.firstName || ' ' || u.lastName) like upper(concat('%', ?1, '%'))
                 and u.mainOrganisationUnitId in ?2
+            order by u.lastName, u.firstName
             """)
     List<User> findUsersByNameOrg(String searchName, Collection<String> mainOrganisationUnitIds);
 
@@ -40,6 +42,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             where
                 upper(u.firstName || ' ' || u.lastName) like upper(concat('%', ?1, '%'))
                 and u.userType = ?2
+            order by u.lastName, u.firstName
             """)
     List<User> findUsersByNameType(String searchName,String userType);
 
@@ -47,6 +50,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
             select u from User u
             where
                 upper(u.firstName || ' ' || u.lastName) like upper(concat('%', ?1, '%'))
+            order by u.lastName, u.firstName
             """)
     List<User> findUsersByName(String searchName);
 
