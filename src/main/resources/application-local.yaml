@@ -27,12 +27,13 @@ spring:
   jpa:
     properties:
       javax:
-        persistence:
-          schema-generation:
-            scripts:
-              action: create
-              create-target: __init.sql
-              create-source: metadata
+      hibernate:
+        jdbc:
+          time_zone: UTC
+          lob:
+            non_contextual_creation: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        enable_lazy_load_no_trans: true
     hibernate:
       ddl-auto: none
   datasource:
