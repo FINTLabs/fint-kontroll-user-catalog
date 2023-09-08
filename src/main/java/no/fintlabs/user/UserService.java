@@ -50,11 +50,11 @@ public class UserService {
         };
     }
 
-    public Mono<DetailedUser> getDetailedUserById(
+    public DetailedUser getDetailedUserById(
             FintJwtEndUserPrincipal principal,
             Long id) {
-        return Mono.just(userRepository.findById(id)
-                .map(User::toDetailedUser).orElse(new DetailedUser()));
+        return userRepository.findById(id)
+                .map(User::toDetailedUser).orElse(new DetailedUser());
     }
 
 

@@ -9,6 +9,9 @@ fint:
   kontroll:
     user-catalog:
       pagesize: 50
+    authorization:
+      authorized-role:
+      authorized-org-id:
 spring:
   security:
     oauth2:
@@ -23,4 +26,7 @@ logging:
   level:
     root: INFO
     org.apache.kafka: INFO
+
+
+
 

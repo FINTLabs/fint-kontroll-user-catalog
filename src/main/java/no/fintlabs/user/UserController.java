@@ -29,17 +29,17 @@ public class UserController {
     }
 
     //@GetMapping(produces = APPLICATION_JSON_VALUE )
-    public ResponseEntity<Map<String, Object>> getUsersUsingOdata(@AuthenticationPrincipal Jwt jwt,
-                                                        @RequestParam(value = "$filter", required = false) String filter,
-                                                        @RequestParam(defaultValue = "0") int page,
-                                                        @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size) {
-
-        log.info("Finding users with filter: " + filter + " at page: " + page + " (first page = 0)" );
-
-        return responseFactory.toResponseEntity(
-                FintJwtEndUserPrincipal.from(jwt),
-                filter, page, size);
-    }
+//    public ResponseEntity<Map<String, Object>> getUsersUsingOdata(@AuthenticationPrincipal Jwt jwt,
+//                                                        @RequestParam(value = "$filter", required = false) String filter,
+//                                                        @RequestParam(defaultValue = "0") int page,
+//                                                        @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size) {
+//
+//        log.info("Finding users with filter: " + filter + " at page: " + page + " (first page = 0)" );
+//
+//        return responseFactory.toResponseEntity(
+//                FintJwtEndUserPrincipal.from(jwt),
+//                filter, page, size);
+//    }
 
     @GetMapping()
     public ResponseEntity<Map<String,Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
@@ -55,7 +55,7 @@ public class UserController {
     }
 
     @GetMapping({"{id}"})
-    public Mono<DetailedUser> getUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public DetailedUser getUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         log.info("Fetching user by id: " + id);
         return userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
     }
