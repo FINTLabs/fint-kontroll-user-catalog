@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.member.MemberService;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
