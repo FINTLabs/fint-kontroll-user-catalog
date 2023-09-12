@@ -103,7 +103,7 @@ public class UserService {
     }
 
 
-    public List<String> getAutorizedOrgUnits(){
+    public List<String> getAllAutorizedOrgUnitIDs(){
 
         List<Scope> scope = authorizationClient.getUserScopes();
         List<String> authorizedOrgIDs = scope.stream()
@@ -115,6 +115,12 @@ public class UserService {
         log.info("Authorized orgUnitIDs"+ authorizedOrgIDs);
 
         return authorizedOrgIDs;
+    }
 
+    public List<String> compareRequestedOrgUnitIDsWithOPA(List<String> requestedOgUnits){
+
+        return getAllAutorizedOrgUnitIDs().stream()
+                .filter(requestedOgUnits::contains)
+                .toList();
     }
 }

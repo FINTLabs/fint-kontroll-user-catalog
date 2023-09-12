@@ -36,18 +36,14 @@ public class UserController {
                                                    ){
 
         log.info("Finding users with search: " + search + " with orgUnitIDs: " + orgUnits + " with UserType: " + userType);
-        List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAutorizedOrgUnits();
+        List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAllAutorizedOrgUnitIDs();
 
         if (orgUnits == null){
             log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: " + allAuthorizedOrgUnitIDsFromOPA);
             return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,orgUnits,userType,page,size);
         }
         else {
-            List<String> authorizedOrgUnitIDs = allAuthorizedOrgUnitIDsFromOPA.stream()
-                    .filter(orgUnits::contains)
-                    .toList();
-            log.info("Returning users in users specified orgunits if orgunit are authorized. Authorized orgUnitIDs: " + authorizedOrgUnitIDs);
-            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search, authorizedOrgUnitIDs,userType,page,size);
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search, userService.compareRequestedOrgUnitIDsWithOPA(orgUnits),userType,page,size);
         }
     }
 
