@@ -1,6 +1,7 @@
 package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.opa.AuthorizationClient;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -19,10 +20,11 @@ public class UserController {
 
     private final ResponseFactory responseFactory;
 
-    public UserController(UserService userService, ResponseFactory responseFactory) {
+    public UserController(UserService userService, ResponseFactory responseFactory, AuthorizationClient authorizationClient) {
         this.userService = userService;
         this.responseFactory = responseFactory;
     }
+
 
     @GetMapping()
     public ResponseEntity<Map<String,Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
@@ -33,8 +35,20 @@ public class UserController {
                                                    @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
                                                    ){
 
-        log.info("Finding users with search: " + search + " in orgunits: " + orgUnits + " with UserType: " + userType);
-        return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,orgUnits,userType,page,size);
+        log.info("Finding users with search: " + search + " with orgUnitIDs: " + orgUnits + " with UserType: " + userType);
+        List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAutorizedOrgUnits();
+
+        if (orgUnits == null){
+            log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: " + allAuthorizedOrgUnitIDsFromOPA);
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,orgUnits,userType,page,size);
+        }
+        else {
+            List<String> authorizedOrgUnitIDs = allAuthorizedOrgUnitIDsFromOPA.stream()
+                    .filter(orgUnits::contains)
+                    .toList();
+            log.info("Returning users in users specified orgunits if orgunit are authorized. Authorized orgUnitIDs: " + authorizedOrgUnitIDs);
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search, authorizedOrgUnitIDs,userType,page,size);
+        }
     }
 
     @GetMapping({"{id}"})

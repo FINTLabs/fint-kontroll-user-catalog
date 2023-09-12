@@ -2,9 +2,12 @@ package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.member.MemberService;
+import no.fintlabs.opa.AuthorizationClient;
+import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -15,11 +18,13 @@ public class UserService {
     private final UserRepository userRepository;
 
     private final MemberService memberService;
+    private final AuthorizationClient authorizationClient;
 
 
-    public UserService(UserRepository userRepository, MemberService memberService) {
+    public UserService(UserRepository userRepository, MemberService memberService, AuthorizationClient authorizationClient) {
         this.userRepository = userRepository;
         this.memberService = memberService;
+        this.authorizationClient = authorizationClient;
     }
 
     public void save(User user) {
@@ -97,4 +102,19 @@ public class UserService {
                 .toList();
     }
 
+
+    public List<String> getAutorizedOrgUnits(){
+
+        List<Scope> scope = authorizationClient.getUserScopes();
+        List<String> authorizedOrgIDs = scope.stream()
+                .filter(s -> s.getObjectType().equals("user"))
+                .map(Scope::getOrgUnits)
+                .flatMap(Collection::stream)
+                .toList();
+        log.info("UserScopes from OPA: " + scope);
+        log.info("Authorized orgUnitIDs"+ authorizedOrgIDs);
+
+        return authorizedOrgIDs;
+
+    }
 }
