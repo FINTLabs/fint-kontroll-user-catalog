@@ -40,7 +40,7 @@ public class UserController {
 
         if (orgUnits == null){
             log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: " + allAuthorizedOrgUnitIDsFromOPA);
-            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,orgUnits,userType,page,size);
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,allAuthorizedOrgUnitIDsFromOPA,userType,page,size);
         }
         else {
             return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search, userService.compareRequestedOrgUnitIDsWithOPA(orgUnits),userType,page,size);
