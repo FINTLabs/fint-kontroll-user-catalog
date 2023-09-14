@@ -9,7 +9,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 
 @Service
@@ -39,7 +42,7 @@ public class UserService {
     private Runnable onSaveNewUser(User user) {
         return () -> {
             User newUser = userRepository.save(user);
-            log.info("Create new user: "+ user.getId());
+            log.info("Create new user: " + user.getId());
             memberService.process(memberService.create(newUser));
         };
     }
@@ -47,17 +50,36 @@ public class UserService {
     private Consumer<User> onSaveExistingUser(User user) {
         return existingUser -> {
             user.setId(existingUser.getId());
-            log.info("Update user: "+ user.getId());
+            log.info("Update user: " + user.getId());
             memberService.process(memberService.create(user));
             userRepository.save(user);
         };
     }
 
-    public DetailedUser getDetailedUserById(
-            FintJwtEndUserPrincipal principal,
-            Long id) {
-        return userRepository.findById(id)
-                .map(User::toDetailedUser).orElse(new DetailedUser());
+    public DetailedUser getDetailedUserById(FintJwtEndUserPrincipal principal, Long id) {
+        List<String> allAuthorizedOrgIDs = getAllAutorizedOrgUnitIDs();
+
+        String requestedUserOrgID = getUserById(principal, id).map(User::getMainOrganisationUnitId).orElse(null);
+        String requestedOrgIDInScope = allAuthorizedOrgIDs.stream().filter(s -> {
+            assert requestedUserOrgID != null;
+            return s.contains(requestedUserOrgID);
+        }).toString();
+        if (!requestedUserOrgID.isEmpty() || requestedOrgIDInScope !=null){
+            DetailedUser requestedUser = userRepository.findById(id)
+                    .map(User::toDetailedUser)
+                    .orElse(new DetailedUser());
+            return requestedUser;
+        }
+        else {
+            return null;
+        }
+//TODO: splitte opp!!
+
+    }
+
+    public Optional<User> getUserById(FintJwtEndUserPrincipal principal, Long id) {
+        return
+                userRepository.findById(id);
     }
 
 
@@ -65,28 +87,28 @@ public class UserService {
             FintJwtEndUserPrincipal principal,
             String search,
             List<String> orgUnits,
-            String userType ) {
+            String userType) {
 
         List<User> users;
 
 
-        if ( (orgUnits == null ) && !(userType.equals("ALLTYPES") )){
-            users = userRepository.findUsersByNameType(search,userType);
+        if ((orgUnits == null) && !(userType.equals("ALLTYPES"))) {
+            users = userRepository.findUsersByNameType(search, userType);
             return users
                     .stream()
                     .map(User::toSimpleUser)
                     .toList();
         }
 
-        if ((orgUnits != null ) && (userType.equals("ALLTYPES"))){
-            users = userRepository.findUsersByNameOrg(search,orgUnits);
+        if ((orgUnits != null) && (userType.equals("ALLTYPES"))) {
+            users = userRepository.findUsersByNameOrg(search, orgUnits);
             return users
                     .stream()
                     .map(User::toSimpleUser)
                     .toList();
         }
 
-        if ((orgUnits == null ) && (userType.equals("ALLTYPES")  )){
+        if ((orgUnits == null) && (userType.equals("ALLTYPES"))) {
             users = userRepository.findUsersByName(search);
             return users
                     .stream()
@@ -95,7 +117,7 @@ public class UserService {
         }
 
 
-        users = userRepository.findUsersByNameOrgType(search,orgUnits,userType);
+        users = userRepository.findUsersByNameOrgType(search, orgUnits, userType);
         return users
                 .stream()
                 .map(User::toSimpleUser)
@@ -103,7 +125,7 @@ public class UserService {
     }
 
 
-    public List<String> getAllAutorizedOrgUnitIDs(){
+    public List<String> getAllAutorizedOrgUnitIDs() {
 
         List<Scope> scope = authorizationClient.getUserScopes();
         List<String> authorizedOrgIDs = scope.stream()
@@ -112,12 +134,12 @@ public class UserService {
                 .flatMap(Collection::stream)
                 .toList();
         log.info("UserScopes from OPA: " + scope);
-        log.info("Authorized orgUnitIDs"+ authorizedOrgIDs);
+        log.info("Authorized orgUnitIDs" + authorizedOrgIDs);
 
         return authorizedOrgIDs;
     }
 
-    public List<String> compareRequestedOrgUnitIDsWithOPA(List<String> requestedOgUnits){
+    public List<String> compareRequestedOrgUnitIDsWithOPA(List<String> requestedOgUnits) {
 
         return getAllAutorizedOrgUnitIDs().stream()
                 .filter(requestedOgUnits::contains)
