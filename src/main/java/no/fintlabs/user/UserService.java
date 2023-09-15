@@ -59,22 +59,20 @@ public class UserService {
     public DetailedUser getDetailedUserById(FintJwtEndUserPrincipal principal, Long id) {
         List<String> allAuthorizedOrgIDs = getAllAutorizedOrgUnitIDs();
 
-        String requestedUserOrgID = getUserById(principal, id).map(User::getMainOrganisationUnitId).orElse(null);
-        String requestedOrgIDInScope = allAuthorizedOrgIDs.stream().filter(s -> {
-            assert requestedUserOrgID != null;
-            return s.contains(requestedUserOrgID);
-        }).toString();
-        if (!requestedUserOrgID.isEmpty() || requestedOrgIDInScope !=null){
-            DetailedUser requestedUser = userRepository.findById(id)
-                    .map(User::toDetailedUser)
-                    .orElse(new DetailedUser());
-            return requestedUser;
+        User requestedUser = getUserById(principal, id).orElse(new User());
+        String requestedUserOrgID = requestedUser.getMainOrganisationUnitId();
+
+        boolean requestedOrgIDInScope = allAuthorizedOrgIDs.contains(requestedUserOrgID);
+
+        if (requestedOrgIDInScope){
+            DetailedUser requestedDetailedUser = requestedUser.toDetailedUser();
+            log.info("User "+principal.getMail()+" has access to users in orgID: " + requestedUserOrgID);
+            return requestedDetailedUser;
         }
         else {
+            log.info("User "+ principal.getMail() +" are not granted access to users in orgID: " + requestedUserOrgID);
             return null;
         }
-//TODO: splitte opp!!
-
     }
 
     public Optional<User> getUserById(FintJwtEndUserPrincipal principal, Long id) {

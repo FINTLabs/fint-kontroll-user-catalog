@@ -27,7 +27,7 @@ public class UserController {
 
 
     @GetMapping()
-    public ResponseEntity<Map<String,Object>> getUsers(@AuthenticationPrincipal Jwt jwt,
+    public ResponseEntity<Map<String,Object>> getSimpleUsers(@AuthenticationPrincipal Jwt jwt,
                                                    @RequestParam(value = "search",defaultValue = "%") String search,
                                                    @RequestParam(value = "orgUnits",required = false)List<String> orgUnits,
                                                    @RequestParam(value = "userType", defaultValue = "ALLTYPES") String userType,
@@ -48,7 +48,7 @@ public class UserController {
     }
 
     @GetMapping({"{id}"})
-    public DetailedUser getUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public DetailedUser getDetailedUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         log.info("Fetching user by id: " + id);
         return userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
     }
