@@ -59,7 +59,7 @@ public class UserService {
     public DetailedUser getDetailedUserById(FintJwtEndUserPrincipal principal, Long id) {
         List<String> allAuthorizedOrgIDs = getAllAutorizedOrgUnitIDs();
 
-        User requestedUser = getUserById(principal, id).orElse(new User());
+        User requestedUser = getUserById(id).orElse(new User());
         String requestedUserOrgID = requestedUser.getMainOrganisationUnitId();
 
         boolean requestedOrgIDInScope = allAuthorizedOrgIDs.contains(requestedUserOrgID);
@@ -71,11 +71,11 @@ public class UserService {
         }
         else {
             log.info("User "+ principal.getMail() +" are not granted access to users in orgID: " + requestedUserOrgID);
-            return null;
+            return new DetailedUser();
         }
     }
 
-    public Optional<User> getUserById(FintJwtEndUserPrincipal principal, Long id) {
+    public Optional<User> getUserById(Long id) {
         return
                 userRepository.findById(id);
     }
