@@ -14,4 +14,9 @@ public class DetailedUser {
     private String organisationUnitName;
     private String mobilePhone;
     private String email;
+
+    public boolean isValid(){
+        return this.id != null;
+    }
+
 }
