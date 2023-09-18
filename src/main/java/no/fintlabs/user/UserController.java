@@ -3,6 +3,7 @@ package no.fintlabs.user;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.AuthorizationClient;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -48,8 +49,13 @@ public class UserController {
     }
 
     @GetMapping({"{id}"})
-    public DetailedUser getDetailedUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
+    public ResponseEntity<DetailedUser> getDetailedUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
         log.info("Fetching user by id: " + id);
-        return userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
+        DetailedUser detailedUserById = userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
+        if (detailedUserById.isValid()){
+            return new ResponseEntity<>(detailedUserById, HttpStatus.OK);
+        }
+        else {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);}
     }
 }
