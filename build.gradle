@@ -39,8 +39,7 @@ dependencies {
     implementation 'org.flywaydb:flyway-core'
     runtimeOnly 'org.postgresql:postgresql'
     implementation 'org.springframework.kafka:spring-kafka'
-    //implementation 'no.fintlabs:fint-kafka:2.3.0'
-    implementation files('/Users/erling/repos/fint/fint-kafka/build/libs/fint-kafka-0-SNAPSHOT.jar')
+    implementation 'no.fintlabs:fint-kafka:3.0.0-rc-1'
     implementation 'no.fintlabs:fint-antlr:1.1.1'
     implementation 'no.fintlabs:fint-resource-server-security:1.1.0'
     implementation 'no.fintlabs:fint-kontroll-authorization:1.0.8'
