@@ -43,7 +43,9 @@ public class ExternalUserService {
         return externalUserRepository.findById(id);
     }
 
-    public List<ExternalUser> getAllExternalUsers()
+    public List<ExternalUser> getAllExternalUsers(){
+        return null;
+    }
 
 
 
