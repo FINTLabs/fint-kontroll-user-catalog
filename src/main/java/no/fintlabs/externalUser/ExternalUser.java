@@ -42,6 +42,17 @@ public class ExternalUser {
                 .organisationUnitId(mainOrganisationUnitId)
                 .build();
     }
+
+    public DetailedExternalUser toDetailedExternalUser(){
+        return DetailedExternalUser
+                .builder()
+                .id(id)
+                .fullName(firstName +" "+ lastName)
+                .organisationUnitName(mainOrganisationUnitName)
+                .mobilePhone(mobilePhone)
+                .email(email)
+                .build();
+    }
 }
 
 
