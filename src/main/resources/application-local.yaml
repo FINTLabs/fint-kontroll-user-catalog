@@ -13,6 +13,7 @@ fint:
     authorization:
       authorized-role: https://role-catalog.vigoiks.no/vigo/samtykke/user
       authorized-org-id: vigo.no
+    externalusers: yes
 spring:
   security:
     oauth2:
