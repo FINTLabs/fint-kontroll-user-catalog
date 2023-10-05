@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
+import no.fintlabs.user.User;
 
 import java.util.UUID;
 
@@ -31,6 +32,24 @@ public class ExternalUser {
     public boolean isValid(){
         return true;
     }
+
+    public User toUser(){
+        return User
+                .builder()
+                .id(id)
+                .firstName(firstName)
+                .lastName(lastName)
+                .userType(userType)
+                .resourceId(String.valueOf(identityProviderUserObjectId))
+                .userName(userName)
+                .identityProviderUserObjectId(identityProviderUserObjectId)
+                .mainOrganisationUnitName(mainOrganisationUnitName)
+                .mainOrganisationUnitId(mainOrganisationUnitId)
+                .email(email)
+                .mobilePhone(mobilePhone)
+                .build();
+    }
+
 
     public SimpelExternalUser toSimpleExternalUser() {
         return SimpelExternalUser
