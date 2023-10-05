@@ -31,4 +31,17 @@ public class ExternalUser {
     public boolean isValid(){
         return true;
     }
+
+    public SimpelExternalUser toSimpleExternalUser() {
+        return SimpelExternalUser
+                .builder()
+                .id(id)
+                .fullName(firstName + " " + lastName)
+                .userType(userType)
+                .organisationUnitName(mainOrganisationUnitName)
+                .organisationUnitId(mainOrganisationUnitId)
+                .build();
+    }
 }
+
+
