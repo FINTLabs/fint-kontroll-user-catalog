@@ -30,7 +30,7 @@ public class ExternalUser {
     private String email;
 
     public boolean isValid(){
-        return true;
+        return this.getUserType().equals("EXTERNAL");
     }
 
     public User toUser(){
