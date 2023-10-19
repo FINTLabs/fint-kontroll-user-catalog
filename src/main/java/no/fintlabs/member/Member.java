@@ -18,5 +18,5 @@ public class Member {
     private String lastName;
     private String userType;
     private String UserName;
-    private UUID userId;
+    private UUID identityProviderUserObjectId;
 }

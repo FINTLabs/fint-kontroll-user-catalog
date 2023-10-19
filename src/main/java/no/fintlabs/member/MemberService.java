@@ -23,7 +23,7 @@ public class MemberService {
                 .lastName(user.getLastName())
                 .userType(user.getUserType())
                 .UserName(user.getUserName())
-                .userId(user.getIdentityProviderUserObjectId())
+                .identityProviderUserObjectId(user.getIdentityProviderUserObjectId())
                 .build();
     }
 }
