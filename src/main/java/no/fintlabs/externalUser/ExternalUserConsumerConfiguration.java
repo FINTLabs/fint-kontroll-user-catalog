@@ -12,7 +12,6 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 public class ExternalUserConsumerConfiguration {
 
     @Bean
-    @ConditionalOnProperty(name = "fint.kontroll.externalusers", havingValue = "yes")
     public ConcurrentMessageListenerContainer<String, ExternalUser> externalUserConsumer(
             ExternalUserService externalUserService,
             EntityConsumerFactoryService entityConsumerFactoryService
