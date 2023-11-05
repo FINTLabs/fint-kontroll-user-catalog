@@ -19,4 +19,6 @@ public class Member {
     private String userType;
     private String UserName;
     private UUID identityProviderUserObjectId;
+    private String organisationUnitName;
+    private String organisationUnitId;
 }
