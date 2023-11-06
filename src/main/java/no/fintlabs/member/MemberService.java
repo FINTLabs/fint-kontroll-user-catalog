@@ -24,6 +24,8 @@ public class MemberService {
                 .userType(user.getUserType())
                 .UserName(user.getUserName())
                 .identityProviderUserObjectId(user.getIdentityProviderUserObjectId())
+                .organisationUnitId(user.getMainOrganisationUnitId())
+                .organisationUnitName(user.getMainOrganisationUnitName())
                 .build();
     }
 }
