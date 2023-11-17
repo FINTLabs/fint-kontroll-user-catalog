@@ -11,7 +11,7 @@ fint:
     opa:
       url: http://localhost:8181/v1/data/accessmanagement
     authorization:
-      authorized-role: https://role-catalog.vigoiks.no/vigo/samtykke/user
+      authorized-role: https://role-catalog.vigoiks.no/vigo/kontroll/user
       authorized-org-id: vigo.no
     externalusers: yes
 spring:
