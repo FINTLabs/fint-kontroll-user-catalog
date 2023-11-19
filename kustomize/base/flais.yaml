@@ -31,4 +31,6 @@ spec:
       value: "vigo.no"
   envFrom:
     - configMapRef:
-        name: fint-kontroll-access-management-config
+        name: fint-environment
+    - configMapRef:
+        name: fint-kontroll-usercatalog-config
