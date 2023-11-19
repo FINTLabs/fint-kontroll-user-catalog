@@ -12,8 +12,9 @@ fint:
     opa:
       url: http://fint-kontroll-opa:8181/v1/data/accessmanagement
     authorization:
-      authorized-role: https://role-catalog.vigoiks.no/vigo/kontroll/user
-      authorized-org-id: vigo.no
+      authorized-role: 'https://role-catalog.vigoiks.no/vigo/kontroll/user'
+      authorized-admin-role: 'https://role-catalog.vigoiks.no/vigo/kontroll/admin'
+      authorized-org-id: 'vigo.no'
     externalusers: yes
 spring:
   security:
