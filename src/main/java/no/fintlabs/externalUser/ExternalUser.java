@@ -23,32 +23,38 @@ public class ExternalUser {
     private String lastName;
     private String userType;
     private String userName;
-    private UUID identityProviderUserObjectId;
+    private UUID idpUserObjectId;
     private String mainOrganisationUnitName;
     private String mainOrganisationUnitId;
     private String mobilePhone;
     private String email;
+    private String userPrincipalName;
+
 
     public boolean isValid(){
         return this.getUserType().equals("EXTERNAL");
     }
 
     public User toUser(){
+
         return User
                 .builder()
                 .id(id)
                 .firstName(firstName)
                 .lastName(lastName)
-                .userType(userType)
-                .resourceId(String.valueOf(identityProviderUserObjectId))
+                .userType("EXTERNAL")
+                .resourceId(String.valueOf(idpUserObjectId))
                 .userName(userName)
-                .identityProviderUserObjectId(identityProviderUserObjectId)
+                .identityProviderUserObjectId(idpUserObjectId)
                 .mainOrganisationUnitName(mainOrganisationUnitName)
                 .mainOrganisationUnitId(mainOrganisationUnitId)
                 .email(email)
                 .mobilePhone(mobilePhone)
                 .build();
     }
+
+
+
 
 
     public SimpelExternalUser toSimpleExternalUser() {

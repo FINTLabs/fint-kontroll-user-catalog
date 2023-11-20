@@ -17,7 +17,7 @@ public class ExternalUserConsumerConfiguration {
     ){
         EntityTopicNameParameters entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
-                .resource("externaluser")
+                .resource("azureuserexternal")
                 .build();
 
         return entityConsumerFactoryService.createFactory(

@@ -15,7 +15,7 @@ class ExternalUserServiceTest {
         ExternalUser externalUser = ExternalUser
                 .builder()
                 .userName("titten@tei.no")
-                .identityProviderUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
+                .idpUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
                 .userType("EXTERNAL")
                 .build();
 
