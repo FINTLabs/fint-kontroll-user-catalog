@@ -19,7 +19,8 @@ public class MemberEntityProducerService {
     private final EntityTopicService entityTopicService;
 
 
-    public MemberEntityProducerService(EntityProducerFactory entityProducerFactory, EntityTopicService entityTopicService) {
+    public MemberEntityProducerService(EntityProducerFactory entityProducerFactory,
+                                       EntityTopicService entityTopicService) {
         entityProducer = entityProducerFactory.createProducer(Member.class);
         this.entityTopicService = entityTopicService;
         entityTopicNameParameters = EntityTopicNameParameters

@@ -9,23 +9,23 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 
 @Service
 @Slf4j
 public class UserService {
     private final UserRepository userRepository;
+    private final UserEntityProducerService userEntityProducerService;
 
     private final MemberService memberService;
     private final AuthorizationClient authorizationClient;
 
 
-    public UserService(UserRepository userRepository, MemberService memberService, AuthorizationClient authorizationClient) {
+    public UserService(UserRepository userRepository, UserEntityProducerService userEntityProducerService, MemberService memberService, AuthorizationClient authorizationClient) {
         this.userRepository = userRepository;
+        this.userEntityProducerService = userEntityProducerService;
         this.memberService = memberService;
         this.authorizationClient = authorizationClient;
     }
@@ -44,6 +44,7 @@ public class UserService {
             User newUser = userRepository.save(user);
             log.info("Create new user: " + user.getId());
             memberService.process(memberService.create(newUser));
+            userEntityProducerService.publish(newUser);
         };
     }
 
@@ -53,6 +54,7 @@ public class UserService {
             log.info("Update user: " + user.getId());
             memberService.process(memberService.create(user));
             userRepository.save(user);
+            userEntityProducerService.publish(user);
         };
     }
 

@@ -5,8 +5,6 @@ import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.oauth2.jwt.Jwt;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,7 @@ public class UserServiceTest {
     public void init(){
         authorizationClient = mock(AuthorizationClient.class);
         userRepository = mock(UserRepository.class);
-        userService = new UserService(userRepository, null, authorizationClient);
+        userService = new UserService(userRepository, null, null, authorizationClient);
     }
     @Test
     public void testGetAllAutorizedOrgUnitIDs() {
