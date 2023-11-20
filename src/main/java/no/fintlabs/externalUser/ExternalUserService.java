@@ -5,19 +5,13 @@ import no.fintlabs.user.User;
 import no.fintlabs.user.UserService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
-
-
 @Service
 @Slf4j
 public class ExternalUserService {
-    private final ExternalUserRepository externalUserRepository;
+
     private final UserService userService;
 
-    public ExternalUserService(ExternalUserRepository externalUserRepository, UserService userService) {
-        this.externalUserRepository = externalUserRepository;
+    public ExternalUserService(UserService userService) {
         this.userService = userService;
     }
 
