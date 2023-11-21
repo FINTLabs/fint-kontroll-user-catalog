@@ -1,5 +1,6 @@
 fint:
   org-id: fintlabs.no
+  application-id: fint-kontroll-user-catalog
   kafka:
     default-replicas: 1
     bootstrap-servers: localhost:9092

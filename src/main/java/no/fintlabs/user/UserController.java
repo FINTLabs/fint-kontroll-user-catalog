@@ -58,4 +58,18 @@ public class UserController {
         else {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);}
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<LoggedOnUser> getLoggedOnUser(@AuthenticationPrincipal Jwt jwt){
+        FintJwtEndUserPrincipal principal = FintJwtEndUserPrincipal.from(jwt);
+        LoggedOnUser loggedOnUser = new LoggedOnUser(
+                principal.getGivenName(),
+                principal.getSurname(),
+                principal.getOrgId(),
+                principal.getMail()
+        );
+
+        return new ResponseEntity<>(loggedOnUser,HttpStatus.OK);
+    }
+
 }
