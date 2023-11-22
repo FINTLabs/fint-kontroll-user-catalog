@@ -53,8 +53,8 @@ public class UserService {
             user.setId(existingUser.getId());
             log.info("Update user: " + user.getId());
             memberService.process(memberService.create(user));
-            userRepository.save(user);
-            userEntityProducerService.publish(user);
+            User savedUser = userRepository.save(user);
+            userEntityProducerService.publish(savedUser);
         };
     }
 
