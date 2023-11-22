@@ -44,6 +44,7 @@ public class UserService {
             User newUser = userRepository.save(user);
             log.info("Create new user: " + user.getId());
             memberService.process(memberService.create(newUser));
+            log.info("created kontrollUser: " + newUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(newUser);
         };
     }
@@ -54,6 +55,7 @@ public class UserService {
             log.info("Update user: " + user.getId());
             memberService.process(memberService.create(user));
             User savedUser = userRepository.save(user);
+            log.info("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(savedUser);
         };
     }
