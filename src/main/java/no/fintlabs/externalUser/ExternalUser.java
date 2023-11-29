@@ -41,7 +41,7 @@ public class ExternalUser {
                 .builder()
                 .id(id)
                 .firstName(firstName)
-                .lastName(lastName)
+                .lastName(lastName + " (ekstern)")
                 .userType("EXTERNAL")
                 .resourceId(String.valueOf(idpUserObjectId))
                 .userName(userName)
