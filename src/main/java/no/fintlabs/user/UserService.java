@@ -129,7 +129,7 @@ public class UserService {
 
     public List<String> getAllAutorizedOrgUnitIDs() {
 
-        List<Scope> scope = authorizationClient.getUserScopes();
+        List<Scope> scope = authorizationClient.getUserScopesList();
         List<String> authorizedOrgIDs = scope.stream()
                 .filter(s -> s.getObjectType().equals("user"))
                 .map(Scope::getOrgUnits)
