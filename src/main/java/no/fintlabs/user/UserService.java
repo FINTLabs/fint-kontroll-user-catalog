@@ -52,10 +52,10 @@ public class UserService {
     private Consumer<User> onSaveExistingUser(User user) {
         return existingUser -> {
             user.setId(existingUser.getId());
-            log.info("Update user: " + user.getId());
+            //log.info("Update user: " + user.getId());
             memberService.process(memberService.create(user));
             User savedUser = userRepository.save(user);
-            log.info("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
+            //log.info("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(savedUser);
         };
     }

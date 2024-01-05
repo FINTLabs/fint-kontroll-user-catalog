@@ -15,6 +15,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,6 +56,10 @@ public class User {
     private String email;
     @Column(name="managerref")
     private  String managerRef;
+//    @Column(name = "status")
+//    private String status;
+//    @Column(name = "statuschanged")
+//    private Date statusChanged;
 
     public SimpleUser toSimpleUser() {
         return SimpleUser

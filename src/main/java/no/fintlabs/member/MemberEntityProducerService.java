@@ -36,7 +36,7 @@ public class MemberEntityProducerService {
 
     public void publish(Member member) {
         String key = member.getResourceId();
-        log.info("Publish member : " + member.getResourceId());
+        //log.info("Publish member : " + member.getResourceId());
         entityProducer.send(
                 EntityProducerRecord.<Member>builder()
                         .topicNameParameters(entityTopicNameParameters)
