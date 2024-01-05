@@ -56,10 +56,10 @@ public class User {
     private String email;
     @Column(name="managerref")
     private  String managerRef;
-//    @Column(name = "status")
-//    private String status;
-//    @Column(name = "statuschanged")
-//    private Date statusChanged;
+    @Column(name = "status")
+    private String status;
+    @Column(name = "statuschanged")
+    private Date statusChanged;
 
     public SimpleUser toSimpleUser() {
         return SimpleUser
