@@ -98,6 +98,7 @@ public class UserService {
             users = userRepository.findUsersByNameType(search, userType);
             return users
                     .stream()
+                    .filter(user -> user.getStatus().equals("ACTIV"))
                     .map(User::toSimpleUser)
                     .toList();
         }
@@ -106,6 +107,7 @@ public class UserService {
             users = userRepository.findUsersByNameOrg(search, orgUnits);
             return users
                     .stream()
+                    .filter(user -> user.getStatus().equals("ACTIV"))
                     .map(User::toSimpleUser)
                     .toList();
         }
@@ -114,6 +116,7 @@ public class UserService {
             users = userRepository.findUsersByName(search);
             return users
                     .stream()
+                    .filter(user -> user.getStatus().equals("ACTIV"))
                     .map(User::toSimpleUser)
                     .toList();
         }
@@ -122,6 +125,7 @@ public class UserService {
         users = userRepository.findUsersByNameOrgType(search, orgUnits, userType);
         return users
                 .stream()
+                .filter(user -> user.getStatus().equals("ACTIV"))
                 .map(User::toSimpleUser)
                 .toList();
     }
