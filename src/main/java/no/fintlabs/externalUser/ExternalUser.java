@@ -51,34 +51,10 @@ public class ExternalUser {
                 .mainOrganisationUnitId(mainOrganisationUnitId)
                 .email(email)
                 .mobilePhone(mobilePhone)
+                .status(accountEnabled?"ACTIV" :"DISABLED")
                 .build();
     }
 
-
-
-
-
-    public SimpelExternalUser toSimpleExternalUser() {
-        return SimpelExternalUser
-                .builder()
-                .id(id)
-                .fullName(firstName + " " + lastName)
-                .userType(userType)
-                .organisationUnitName(mainOrganisationUnitName)
-                .organisationUnitId(mainOrganisationUnitId)
-                .build();
-    }
-
-    public DetailedExternalUser toDetailedExternalUser(){
-        return DetailedExternalUser
-                .builder()
-                .id(id)
-                .fullName(firstName +" "+ lastName)
-                .organisationUnitName(mainOrganisationUnitName)
-                .mobilePhone(mobilePhone)
-                .email(email)
-                .build();
-    }
 }
 
 
