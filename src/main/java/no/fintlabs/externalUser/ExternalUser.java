@@ -29,6 +29,7 @@ public class ExternalUser {
     private String mobilePhone;
     private String email;
     private String userPrincipalName;
+    private boolean accountEnabled;
 
 
     public boolean isValid(){
