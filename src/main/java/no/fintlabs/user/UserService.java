@@ -131,6 +131,25 @@ public class UserService {
     }
 
 
+    public List<SimpleUser> getSimpleUsersUsingSpec(
+            String search,
+            List<String> orgUnits,
+            String userType
+    ){
+        UserSpesificationBuilder userSpesification = new UserSpesificationBuilder(search,orgUnits,userType);
+
+        List<User> userList = userRepository.findAll(userSpesification.build());
+//                .stream()
+//                .filter(user -> user.getStatus().equals("ACTIV"))
+//                .map(User::toSimpleUser)
+//                .toList();
+
+        return userList.stream()
+                .filter(user -> user.getStatus().equals("ACTIV"))
+                .map(User::toSimpleUser)
+                .toList();
+    }
+
     public List<String> getAllAutorizedOrgUnitIDs() {
 
         List<Scope> scope = authorizationClient.getUserScopesList();

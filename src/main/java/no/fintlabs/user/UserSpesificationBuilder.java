@@ -33,7 +33,7 @@ public class UserSpesificationBuilder {
     private Specification<User> allAutorizedOrgUnits(List<String> orgUnits) {
 
         return (root, query, criteriaBuilder) -> criteriaBuilder
-                .in(root.get("mainOrganisationUnitId")).in(orgUnits);
+                .in(root.get("mainOrganisationUnitId")).value(orgUnits);
     }
 
     private Specification<User> userTypeEquals(String userType) {
