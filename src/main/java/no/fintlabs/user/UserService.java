@@ -85,51 +85,6 @@ public class UserService {
     }
 
 
-//    public List<SimpleUser> getSimpleUsers(
-//            FintJwtEndUserPrincipal principal,
-//            String search,
-//            List<String> orgUnits,
-//            String userType) {
-//
-//        List<User> users;
-//
-//
-//        if ((orgUnits == null) && !(userType.equals("ALLTYPES"))) {
-//            users = userRepository.findUsersByNameType(search, userType);
-//            return users
-//                    .stream()
-//                    .filter(user -> user.getStatus().equals("ACTIV"))
-//                    .map(User::toSimpleUser)
-//                    .toList();
-//        }
-//
-//        if ((orgUnits != null) && (userType.equals("ALLTYPES"))) {
-//            users = userRepository.findUsersByNameOrg(search, orgUnits);
-//            return users
-//                    .stream()
-//                    .filter(user -> user.getStatus().equals("ACTIV"))
-//                    .map(User::toSimpleUser)
-//                    .toList();
-//        }
-//
-//        if ((orgUnits == null) && (userType.equals("ALLTYPES"))) {
-//            users = userRepository.findUsersByName(search);
-//            return users
-//                    .stream()
-//                    .filter(user -> user.getStatus().equals("ACTIV"))
-//                    .map(User::toSimpleUser)
-//                    .toList();
-//        }
-//
-//
-//        users = userRepository.findUsersByNameOrgType(search, orgUnits, userType);
-//        return users
-//                .stream()
-//                .filter(user -> user.getStatus().equals("ACTIV"))
-//                .map(User::toSimpleUser)
-//                .toList();
-//    }
-
 
     public List<SimpleUser> getSimpleUsersUsingSpec(
             String search,

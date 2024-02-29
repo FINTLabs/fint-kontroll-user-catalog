@@ -8,7 +8,7 @@ import java.util.List;
 @Slf4j
 public class UserSpesificationBuilder {
     private final String search;
-    private final List<String> orgUnits; //lovlige orgunits
+    private final List<String> orgUnits;
     private final String userType;
 
     public UserSpesificationBuilder(String search, List<String> orgUnits, String userType) {

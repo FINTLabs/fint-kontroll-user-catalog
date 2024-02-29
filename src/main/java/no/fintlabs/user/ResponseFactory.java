@@ -31,8 +31,7 @@ public class ResponseFactory {
             int page,
             int size
     ) {
-        //List<SimpleUser> simpleUsers = userService.getSimpleUsers(principal,search,orgUnits,userType);
-        List<SimpleUser> simpleUsers = userService.getSimpleUsersUsingSpec(search,orgUnits,userType);
+       List<SimpleUser> simpleUsers = userService.getSimpleUsersUsingSpec(search,orgUnits,userType);
         ResponseEntity<Map<String,Object>> entity = toResponseEntity(
                 toPage(simpleUsers,PageRequest.of(page, size)));
 
