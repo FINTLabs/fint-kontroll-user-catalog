@@ -52,10 +52,10 @@ public class UserService {
     private Consumer<User> onSaveExistingUser(User user) {
         return existingUser -> {
             user.setId(existingUser.getId());
-            //log.info("Update user: " + user.getId());
+            log.debug("Update user: " + user.getId());
             memberService.process(memberService.create(user));
             User savedUser = userRepository.save(user);
-            //log.info("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
+            log.debug("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(savedUser);
         };
     }
@@ -85,51 +85,65 @@ public class UserService {
     }
 
 
-    public List<SimpleUser> getSimpleUsers(
-            FintJwtEndUserPrincipal principal,
+//    public List<SimpleUser> getSimpleUsers(
+//            FintJwtEndUserPrincipal principal,
+//            String search,
+//            List<String> orgUnits,
+//            String userType) {
+//
+//        List<User> users;
+//
+//
+//        if ((orgUnits == null) && !(userType.equals("ALLTYPES"))) {
+//            users = userRepository.findUsersByNameType(search, userType);
+//            return users
+//                    .stream()
+//                    .filter(user -> user.getStatus().equals("ACTIV"))
+//                    .map(User::toSimpleUser)
+//                    .toList();
+//        }
+//
+//        if ((orgUnits != null) && (userType.equals("ALLTYPES"))) {
+//            users = userRepository.findUsersByNameOrg(search, orgUnits);
+//            return users
+//                    .stream()
+//                    .filter(user -> user.getStatus().equals("ACTIV"))
+//                    .map(User::toSimpleUser)
+//                    .toList();
+//        }
+//
+//        if ((orgUnits == null) && (userType.equals("ALLTYPES"))) {
+//            users = userRepository.findUsersByName(search);
+//            return users
+//                    .stream()
+//                    .filter(user -> user.getStatus().equals("ACTIV"))
+//                    .map(User::toSimpleUser)
+//                    .toList();
+//        }
+//
+//
+//        users = userRepository.findUsersByNameOrgType(search, orgUnits, userType);
+//        return users
+//                .stream()
+//                .filter(user -> user.getStatus().equals("ACTIV"))
+//                .map(User::toSimpleUser)
+//                .toList();
+//    }
+
+
+    public List<SimpleUser> getSimpleUsersUsingSpec(
             String search,
             List<String> orgUnits,
-            String userType) {
+            String userType
+    ){
+        UserSpesificationBuilder userSpesification = new UserSpesificationBuilder(search,orgUnits,userType);
+        List<User> userList = userRepository.findAll(userSpesification.build());
 
-        List<User> users;
-
-
-        if ((orgUnits == null) && !(userType.equals("ALLTYPES"))) {
-            users = userRepository.findUsersByNameType(search, userType);
-            return users
-                    .stream()
-                    .filter(user -> user.getStatus().equals("ACTIV"))
-                    .map(User::toSimpleUser)
-                    .toList();
-        }
-
-        if ((orgUnits != null) && (userType.equals("ALLTYPES"))) {
-            users = userRepository.findUsersByNameOrg(search, orgUnits);
-            return users
-                    .stream()
-                    .filter(user -> user.getStatus().equals("ACTIV"))
-                    .map(User::toSimpleUser)
-                    .toList();
-        }
-
-        if ((orgUnits == null) && (userType.equals("ALLTYPES"))) {
-            users = userRepository.findUsersByName(search);
-            return users
-                    .stream()
-                    .filter(user -> user.getStatus().equals("ACTIV"))
-                    .map(User::toSimpleUser)
-                    .toList();
-        }
-
-
-        users = userRepository.findUsersByNameOrgType(search, orgUnits, userType);
-        return users
-                .stream()
+        return userList.stream()
                 .filter(user -> user.getStatus().equals("ACTIV"))
                 .map(User::toSimpleUser)
                 .toList();
     }
-
 
     public List<String> getAllAutorizedOrgUnitIDs() {
 
