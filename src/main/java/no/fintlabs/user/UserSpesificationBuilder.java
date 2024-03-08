@@ -44,8 +44,8 @@ public class UserSpesificationBuilder {
     private Specification<User> usersNameLike(String search) {
         return (root, query, criteriaBuilder) ->
                 criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + search + "%"),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + search + "%")
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + search.toLowerCase() + "%"),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + search.toLowerCase() + "%")
                 );
 
     }
