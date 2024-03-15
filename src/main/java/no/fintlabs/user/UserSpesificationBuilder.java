@@ -1,12 +1,14 @@
 package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
+import no.fintlabs.opa.model.OrgUnitType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.List;
 
 @Slf4j
 public class UserSpesificationBuilder {
+
     private final String search;
     private final List<String> orgUnits;
     private final String userType;
@@ -18,9 +20,15 @@ public class UserSpesificationBuilder {
     }
 
     public Specification<User> build() {
-        Specification<User> userSpec = allAutorizedOrgUnits(orgUnits) ;
+        Specification<User> userSpec;
 
-        if (!search.isEmpty()){
+        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name())) {
+            userSpec = Specification.where(null);
+        } else {
+            userSpec = allAutorizedOrgUnits(orgUnits);
+        }
+
+        if (!search.isEmpty()) {
             userSpec = userSpec.and(usersNameLike(search));
         }
         if (!userType.equals("ALLTYPES")) {
@@ -38,7 +46,7 @@ public class UserSpesificationBuilder {
 
     private Specification<User> userTypeEquals(String userType) {
         return (root, query, criteriaBuilder) -> criteriaBuilder
-                .equal(criteriaBuilder.lower(root.get("userType")),userType);
+                .equal(criteriaBuilder.lower(root.get("userType")), userType);
     }
 
     private Specification<User> usersNameLike(String search) {
