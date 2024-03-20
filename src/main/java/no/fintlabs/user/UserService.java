@@ -3,6 +3,7 @@ package no.fintlabs.user;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.member.MemberService;
 import no.fintlabs.opa.AuthorizationClient;
+import no.fintlabs.opa.model.OrgUnitType;
 import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
@@ -103,6 +104,7 @@ public class UserService {
     public List<String> getAllAutorizedOrgUnitIDs() {
 
         List<Scope> scope = authorizationClient.getUserScopesList();
+
         List<String> authorizedOrgIDs = scope.stream()
                 .filter(s -> s.getObjectType().equals("user"))
                 .map(Scope::getOrgUnits)
@@ -115,8 +117,14 @@ public class UserService {
     }
 
     public List<String> compareRequestedOrgUnitIDsWithOPA(List<String> requestedOgUnits) {
+        List<String> orgUnitsfromOPA = getAllAutorizedOrgUnitIDs();
 
-        return getAllAutorizedOrgUnitIDs().stream()
+        if (orgUnitsfromOPA.contains(OrgUnitType.ALLORGUNITS.name())){
+            return requestedOgUnits;
+        }
+
+
+        return orgUnitsfromOPA.stream()
                 .filter(requestedOgUnits::contains)
                 .toList();
     }

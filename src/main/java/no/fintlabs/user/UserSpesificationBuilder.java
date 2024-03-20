@@ -22,7 +22,7 @@ public class UserSpesificationBuilder {
     public Specification<User> build() {
         Specification<User> userSpec;
 
-        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name())) {
+        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name()) ) {
             userSpec = Specification.where(null);
         } else {
             userSpec = allAutorizedOrgUnits(orgUnits);
