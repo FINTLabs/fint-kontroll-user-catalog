@@ -67,7 +67,8 @@ public class UserService {
         User requestedUser = getUserById(id).orElse(new User());
         String requestedUserOrgID = requestedUser.getMainOrganisationUnitId();
 
-        boolean requestedOrgIDInScope = allAuthorizedOrgIDs.contains(requestedUserOrgID);
+        boolean requestedOrgIDInScope = allAuthorizedOrgIDs.contains(requestedUserOrgID )
+                || allAuthorizedOrgIDs.contains(OrgUnitType.ALLORGUNITS.name());
 
         if (requestedOrgIDInScope){
             DetailedUser requestedDetailedUser = requestedUser.toDetailedUser();
