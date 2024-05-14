@@ -44,7 +44,7 @@ public class UserService {
         return () -> {
             User newUser = userRepository.save(user);
             log.info("Create new user: " + user.getId());
-            memberService.process(memberService.create(newUser));
+            //memberService.process(memberService.create(newUser));
             log.info("created kontrollUser: " + newUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(newUser);
         };
@@ -54,7 +54,7 @@ public class UserService {
         return existingUser -> {
             user.setId(existingUser.getId());
             log.debug("Update user: " + user.getId());
-            memberService.process(memberService.create(user));
+            //memberService.process(memberService.create(user));
             User savedUser = userRepository.save(user);
             log.debug("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(savedUser);
