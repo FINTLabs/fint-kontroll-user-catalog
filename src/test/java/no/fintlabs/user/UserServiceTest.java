@@ -24,7 +24,7 @@ public class UserServiceTest {
     public void init(){
         authorizationClient = mock(AuthorizationClient.class);
         userRepository = mock(UserRepository.class);
-        userService = new UserService(userRepository, null, null, authorizationClient);
+        userService = new UserService(userRepository,  null, authorizationClient);
     }
     @Test
     public void testGetAllAutorizedOrgUnitIDs() {

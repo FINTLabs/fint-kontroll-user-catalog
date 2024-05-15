@@ -1,7 +1,6 @@
 package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.member.MemberService;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.OrgUnitType;
 import no.fintlabs.opa.model.Scope;
@@ -19,15 +18,12 @@ import java.util.function.Consumer;
 public class UserService {
     private final UserRepository userRepository;
     private final UserEntityProducerService userEntityProducerService;
-
-    private final MemberService memberService;
     private final AuthorizationClient authorizationClient;
 
 
-    public UserService(UserRepository userRepository, UserEntityProducerService userEntityProducerService, MemberService memberService, AuthorizationClient authorizationClient) {
+    public UserService(UserRepository userRepository, UserEntityProducerService userEntityProducerService, AuthorizationClient authorizationClient) {
         this.userRepository = userRepository;
         this.userEntityProducerService = userEntityProducerService;
-        this.memberService = memberService;
         this.authorizationClient = authorizationClient;
     }
 
@@ -44,7 +40,6 @@ public class UserService {
         return () -> {
             User newUser = userRepository.save(user);
             log.info("Create new user: " + user.getId());
-            //memberService.process(memberService.create(newUser));
             log.info("created kontrollUser: " + newUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(newUser);
         };
@@ -54,7 +49,6 @@ public class UserService {
         return existingUser -> {
             user.setId(existingUser.getId());
             log.debug("Update user: " + user.getId());
-            //memberService.process(memberService.create(user));
             User savedUser = userRepository.save(user);
             log.debug("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(savedUser);
