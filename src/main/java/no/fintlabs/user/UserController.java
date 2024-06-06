@@ -36,7 +36,7 @@ public class UserController {
                                                    @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
                                                    ){
 
-        log.info("Finding users with search: " + search + " with orgUnitIDs: " + orgUnits + " with UserType: " + userType);
+        log.info("Finding users with search: {} with orgUnitIDs: {} with UserType: {}", search, orgUnits, userType);
 
 
         if (orgUnits == null){
@@ -51,7 +51,7 @@ public class UserController {
 
     @GetMapping({"{id}"})
     public ResponseEntity<DetailedUser> getDetailedUserById(@AuthenticationPrincipal Jwt jwt, @PathVariable Long id) {
-        log.info("Fetching user by id: " + id);
+        log.info("Fetching user by id: {}", id);
         DetailedUser detailedUserById = userService.getDetailedUserById(FintJwtEndUserPrincipal.from(jwt), id);
         if (detailedUserById.isValid()){
             return new ResponseEntity<>(detailedUserById, HttpStatus.OK);
