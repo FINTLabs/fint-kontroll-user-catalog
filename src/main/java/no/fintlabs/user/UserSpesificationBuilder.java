@@ -22,7 +22,7 @@ public class UserSpesificationBuilder {
     public Specification<User> build() {
         Specification<User> userSpec;
 
-        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name()) ) {
+        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name())) {
             userSpec = Specification.where(null);
         } else {
             userSpec = allAutorizedOrgUnits(orgUnits);
@@ -50,12 +50,22 @@ public class UserSpesificationBuilder {
     }
 
     private Specification<User> usersNameLike(String search) {
-        return (root, query, criteriaBuilder) ->
-                criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), "%" + search.toLowerCase() + "%"),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), "%" + search.toLowerCase() + "%")
-                );
 
+        return (root, query, criteriaBuilder) -> {
+            String searchPattern = "%" + search + "%";
+            return criteriaBuilder.or(
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
+                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern),
+                    criteriaBuilder.like(
+                            criteriaBuilder.lower(
+                                    criteriaBuilder.concat(
+                                            criteriaBuilder.concat(root.get("firstName"), " "),
+                                            root.get("lastName")
+                                    )
+                            ), searchPattern)
+
+            );
+        };
     }
 
 
