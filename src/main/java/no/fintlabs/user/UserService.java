@@ -91,7 +91,7 @@ public class UserService {
         List<User> userList = userRepository.findAll(userSpesification.build());
 
         return userList.stream()
-                .filter(user -> user.getStatus().equals("ACTIV"))
+                .filter(user -> user.getStatus().equals("ACTIVE"))
                 .map(User::toSimpleUser)
                 .toList();
     }
