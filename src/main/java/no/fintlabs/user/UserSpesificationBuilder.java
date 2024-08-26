@@ -1,10 +1,13 @@
 package no.fintlabs.user;
 
+import jakarta.persistence.criteria.Predicate;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.model.OrgUnitType;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.util.ArrayList;
 import java.util.List;
+
 
 @Slf4j
 public class UserSpesificationBuilder {
@@ -49,24 +52,23 @@ public class UserSpesificationBuilder {
                 .equal(criteriaBuilder.lower(root.get("userType")), userType);
     }
 
+
     private Specification<User> usersNameLike(String search) {
-
         return (root, query, criteriaBuilder) -> {
-            String searchPattern = "%" + search + "%";
-            return criteriaBuilder.or(
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
-                    criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern),
-                    criteriaBuilder.like(
-                            criteriaBuilder.lower(
-                                    criteriaBuilder.concat(
-                                            criteriaBuilder.concat(root.get("firstName"), " "),
-                                            root.get("lastName")
-                                    )
-                            ), searchPattern)
+            String[] searchParts = search.toLowerCase().split("\\s+");
 
-            );
+            List<Predicate> predicates = new ArrayList<>();
+
+            for (String part : searchParts) {
+                String searchPattern = "%" + part + "%";
+                predicates.add(criteriaBuilder.or(
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern)
+                ));
+            }
+
+            return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
-
 
 }
