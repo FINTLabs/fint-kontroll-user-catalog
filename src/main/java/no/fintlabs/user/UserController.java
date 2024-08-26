@@ -38,10 +38,9 @@ public class UserController {
 
         log.info("Finding users with search: {} with orgUnitIDs: {} with UserType: {}", search, orgUnits, userType);
 
-
         if (orgUnits == null){
             List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAllAutorizedOrgUnitIDs();
-            log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: " + allAuthorizedOrgUnitIDsFromOPA);
+            log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: {}", allAuthorizedOrgUnitIDsFromOPA);
             return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt),search,allAuthorizedOrgUnitIDsFromOPA,userType,page,size);
         }
         else {

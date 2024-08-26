@@ -6,9 +6,6 @@ import lombok.*;
 @Setter
 @Builder
 public class SimpleUser {
-
-
-
     private Long id;
     private String fullName;
     private String organisationUnitName;

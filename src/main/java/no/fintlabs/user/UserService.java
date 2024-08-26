@@ -28,12 +28,9 @@ public class UserService {
     }
 
     public void save(User user) {
-
         userRepository
                 .findUserByResourceIdEqualsIgnoreCase(user.getResourceId())
                 .ifPresentOrElse(onSaveExistingUser(user), onSaveNewUser(user));
-
-
     }
 
     private Runnable onSaveNewUser(User user) {
@@ -96,6 +93,7 @@ public class UserService {
                 .toList();
     }
 
+
     public List<String> getAllAutorizedOrgUnitIDs() {
 
         List<Scope> scope = authorizationClient.getUserScopesList();
@@ -111,13 +109,13 @@ public class UserService {
         return authorizedOrgIDs;
     }
 
+
     public List<String> compareRequestedOrgUnitIDsWithOPA(List<String> requestedOgUnits) {
         List<String> orgUnitsfromOPA = getAllAutorizedOrgUnitIDs();
 
         if (orgUnitsfromOPA.contains(OrgUnitType.ALLORGUNITS.name())){
             return requestedOgUnits;
         }
-
 
         return orgUnitsfromOPA.stream()
                 .filter(requestedOgUnits::contains)
