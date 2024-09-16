@@ -27,6 +27,10 @@ public class UserService {
         this.authorizationClient = authorizationClient;
     }
 
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
     public void save(User user) {
         userRepository
                 .findUserByResourceIdEqualsIgnoreCase(user.getResourceId())
