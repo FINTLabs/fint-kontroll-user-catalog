@@ -81,15 +81,14 @@ public class UserController {
         /*if (!validateIsAdmin(jwt)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to republish all kontrollusers");
         }*/
-
-        log.info("Republishing all kontrollusers");
-
         List<User> allUsers = userService.getAllUsers();
+        log.info("Republishing all {} kontrollusers", allUsers.size());
+
         allUsers.stream()
                 .filter(user -> user.getIdentityProviderUserObjectId() != null)
                 .forEach(userEntityProducerService::publish);
 
-        log.info("Republishing all kontrollusers done");
+        log.info("Republishing all {} kontrollusers done", allUsers.size());
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
