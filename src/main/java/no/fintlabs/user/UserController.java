@@ -18,12 +18,14 @@ import java.util.Map;
 public class UserController {
 
     private final UserService userService;
+    private final UserEntityProducerService userEntityProducerService;
 
     private final ResponseFactory responseFactory;
 
-    public UserController(UserService userService, ResponseFactory responseFactory, AuthorizationClient authorizationClient) {
+    public UserController(UserService userService, ResponseFactory responseFactory, AuthorizationClient authorizationClient, UserEntityProducerService userEntityProducerService) {
         this.userService = userService;
         this.responseFactory = responseFactory;
+        this.userEntityProducerService = userEntityProducerService;
     }
 
 
@@ -72,4 +74,22 @@ public class UserController {
         return new ResponseEntity<>(loggedOnUser,HttpStatus.OK);
     }
 
+    @PostMapping("/republish")
+    public ResponseEntity<HttpStatus> republishKontrollUsers() { //@AuthenticationPrincipal Jwt jwt) {
+
+        //TODO: implement when agreed on security solution
+        /*if (!validateIsAdmin(jwt)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to republish all kontrollusers");
+        }*/
+        List<User> allUsers = userService.getAllUsers();
+        log.info("Republishing all {} kontrollusers", allUsers.size());
+
+        allUsers.stream()
+                .filter(user -> user.getIdentityProviderUserObjectId() != null)
+                .forEach(userEntityProducerService::publish);
+
+        log.info("Republishing all {} kontrollusers done", allUsers.size());
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
