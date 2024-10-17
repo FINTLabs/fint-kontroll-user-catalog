@@ -50,6 +50,13 @@ public class ResponseFactory {
         );
     }
 
+    public ResponseEntity<Map<String,Object>> toResponseEntity(String message) {
+        return new ResponseEntity<>(
+                Map.of("message", message),
+                HttpStatus.OK
+        );
+    }
+
     private Page<SimpleUser> toPage(List<SimpleUser> list, Pageable paging) {
         int start = (int) paging.getOffset();
         int end = Math.min((start + paging.getPageSize()), list.size());
@@ -58,6 +65,4 @@ public class ResponseFactory {
                 ? new PageImpl<>(new ArrayList<>(), paging, list.size())
                 : new PageImpl<>(list.subList(start, end), paging, list.size());
     }
-
-
 }

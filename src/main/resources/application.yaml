@@ -9,6 +9,9 @@ fint:
   kontroll:
     user-catalog:
       pagesize: 50
+      publishing:
+        initial-delay: 0
+        fixed-delay: 48
     opa:
       url: http://fint-kontroll-opa:8181/v1/data/accessmanagement
     authorization:
