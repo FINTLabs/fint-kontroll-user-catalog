@@ -8,14 +8,18 @@ import no.fintlabs.kafka.entity.topic.EntityTopicNameParameters;
 import no.fintlabs.kafka.entity.topic.EntityTopicService;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Slf4j
 public class UserEntityProducerService {
     private final EntityProducer<User> entityProducer;
     private final EntityTopicNameParameters entityTopicNameParameters;
 
-    public UserEntityProducerService(EntityProducerFactory entityProducerFactory,
-                                     EntityTopicService entityTopicService) {
+    public UserEntityProducerService(
+            EntityProducerFactory entityProducerFactory,
+            EntityTopicService entityTopicService
+    ) {
         entityProducer = entityProducerFactory.createProducer(User.class);
         entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
@@ -33,5 +37,13 @@ public class UserEntityProducerService {
                         .value(user)
                         .build()
         );
+    }
+
+    public int publishAllKontrollUsers(String triggerType, List<User> allUsers){
+        log.info("Republishing all {} kontrollusers triggered by {}", allUsers.size(), triggerType);
+
+        allUsers.forEach(this::publish);
+        log.info("Republishing all {} kontrollusers triggered by {} done", allUsers.size(), triggerType);
+        return allUsers.size();
     }
 }

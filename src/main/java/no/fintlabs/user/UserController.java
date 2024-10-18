@@ -75,21 +75,21 @@ public class UserController {
     }
 
     @PostMapping("/republish")
-    public ResponseEntity<HttpStatus> republishKontrollUsers() { //@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<Map<String,Object>> republishKontrollUsers(@AuthenticationPrincipal Jwt jwt) {
 
         //TODO: implement when agreed on security solution
         /*if (!validateIsAdmin(jwt)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to republish all kontrollusers");
         }*/
+        String triggerType = "admin (" + FintJwtEndUserPrincipal.from(jwt).getMail() + ") request";
         List<User> allUsers = userService.getAllUsers();
-        log.info("Republishing all {} kontrollusers", allUsers.size());
 
-        allUsers.stream()
-                .filter(user -> user.getIdentityProviderUserObjectId() != null)
-                .forEach(userEntityProducerService::publish);
+        if (allUsers.isEmpty()) {
+            log.info("No users found to publish");
+            return responseFactory.toResponseEntity("No users found to publish");
+        }
+        int noOfPublishedUsers = userEntityProducerService.publishAllKontrollUsers(triggerType, allUsers);
 
-        log.info("Republishing all {} kontrollusers done", allUsers.size());
-
-        return new ResponseEntity<>(HttpStatus.OK);
+        return responseFactory.toResponseEntity("Republished " + noOfPublishedUsers + " users");
     }
 }

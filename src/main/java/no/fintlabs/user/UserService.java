@@ -28,7 +28,10 @@ public class UserService {
     }
 
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userRepository.findAll()
+                .stream()
+                .filter(user -> user.getIdentityProviderUserObjectId() != null)
+                .toList();
     }
 
     public void save(User user) {
@@ -40,8 +43,8 @@ public class UserService {
     private Runnable onSaveNewUser(User user) {
         return () -> {
             User newUser = userRepository.save(user);
-            log.info("Create new user: " + user.getId());
-            log.info("created kontrollUser: " + newUser.getIdentityProviderUserObjectId());
+            log.info("Create new user: {}", user.getId());
+            log.info("Created kontrollUser: {}", newUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(newUser);
         };
     }
@@ -49,9 +52,9 @@ public class UserService {
     private Consumer<User> onSaveExistingUser(User user) {
         return existingUser -> {
             user.setId(existingUser.getId());
-            log.debug("Update user: " + user.getId());
+            log.debug("Update user: {}", user.getId());
             User savedUser = userRepository.save(user);
-            log.debug("update kontrollUser: " + savedUser.getIdentityProviderUserObjectId());
+            log.debug("update kontrollUser: {}", savedUser.getIdentityProviderUserObjectId());
             userEntityProducerService.publish(savedUser);
         };
     }
