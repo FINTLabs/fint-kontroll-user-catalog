@@ -50,7 +50,7 @@ public class ExternalUser {
                 .mainOrganisationUnitName(mainOrganisationUnitName)
                 .mainOrganisationUnitId(mainOrganisationUnitId)
                 .email(email)
-                .mobilePhone(mobilePhone)
+                .mobilePhone(null)
                 .status(accountEnabled?"ACTIVE" :"DISABLED")
                 .build();
     }
