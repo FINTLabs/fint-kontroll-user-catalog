@@ -60,6 +60,10 @@ public class User {
     private String status;
     @Column(name = "statuschanged")
     private Date statusChanged;
+    @Column(name="validfrom")
+    private Date validFrom;
+    @Column(name="validto")
+    private Date validTo;
 
     public SimpleUser toSimpleUser() {
         return SimpleUser

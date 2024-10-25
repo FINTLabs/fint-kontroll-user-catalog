@@ -1,6 +1,8 @@
 package no.fintlabs.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
+
 
 @Getter
 @Setter
@@ -15,6 +17,7 @@ public class DetailedUser {
     private String mobilePhone;
     private String email;
 
+    @JsonIgnore
     public boolean isValid(){
         return this.id != null;
     }
