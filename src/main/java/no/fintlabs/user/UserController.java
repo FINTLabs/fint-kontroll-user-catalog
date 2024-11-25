@@ -2,6 +2,7 @@ package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.AuthorizationClient;
+import no.fintlabs.opa.model.AuthRole;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -72,13 +74,14 @@ public class UserController {
     public ResponseEntity<LoggedOnUser> getLoggedOnUser(@AuthenticationPrincipal Jwt jwt) {
         FintJwtEndUserPrincipal principal = FintJwtEndUserPrincipal.from(jwt);
 
-        //TODO: Add logged on users roles from authorizationClient (need new version)
+        List<AuthRole> userRoles = authorizationClient.getUserRoles();
 
         LoggedOnUser loggedOnUser = new LoggedOnUser(
                 principal.getGivenName(),
                 principal.getSurname(),
                 principal.getOrgId(),
-                principal.getMail()
+                principal.getMail(),
+                userRoles
         );
 
         return new ResponseEntity<>(loggedOnUser, HttpStatus.OK);
@@ -86,11 +89,9 @@ public class UserController {
 
     @PostMapping("/republish")
     public ResponseEntity<Map<String,Object>> republishKontrollUsers(@AuthenticationPrincipal Jwt jwt) {
-
-        //TODO: Implement this. Has to check if user is admin from either jwt or opa. Maybe use authorizatinClient
-//        if (!validateIsAdmin(jwt)) {
-//            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to republish all kontrollusers");
-//        }
+        if (!authorizationClient.isAdmin()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to republish all kontrollusers");
+        }
 
         String triggerType = "admin (" + FintJwtEndUserPrincipal.from(jwt).getMail() + ") request";
         List<User> allUsers = userService.getAllUsers();

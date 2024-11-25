@@ -2,7 +2,6 @@ package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.AuthorizationClient;
-import no.fintlabs.opa.model.OrgUnitType;
 import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;

@@ -3,6 +3,7 @@ package no.fintlabs.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import no.fintlabs.opa.AuthorizationClient;
+import no.fintlabs.opa.model.AuthRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -60,6 +62,28 @@ public class UserControllerTest {
     public void setup() {
         this.mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService, responseFactory, authorizationClient, userEntityProducerService)).build();
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context).build();
+    }
+
+    @Test
+    public void shouldGetLoggedOnUserInformation() throws Exception {
+        String principalMail = "test@example.com";
+        String role = "ROLE_USER";
+        Jwt jwt = createFullMockJwtToken(role, principalMail, "Kjell", "Testersen", "89898989");
+        createSecurityContext(jwt, role);
+
+        when(authorizationClient.getUserRoles()).thenReturn(List.of(new AuthRole("sa", "Systemadministrator")));
+
+        mockMvc.perform(get("/api/users/me"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.firstName").value("Kjell"))
+                .andExpect(jsonPath("$.lastName").value("Testersen"))
+                .andExpect(jsonPath("$.mail").value(principalMail))
+                .andExpect(jsonPath("$.organisationId").value("89898989"))
+                .andExpect(jsonPath("$.roles").isArray())
+                .andExpect(jsonPath("$.roles[0].id").value("sa"))
+                .andExpect(jsonPath("$.roles[0].name").value("Systemadministrator"));
+
+        verify(authorizationClient, times(1)).getUserRoles();
     }
 
     @Test
@@ -137,6 +161,17 @@ public class UserControllerTest {
         Map<String, Object> claims = new HashMap<>();
         claims.put("roles", List.of("authenticated", role));
         claims.put("email", email);
+        Jwt jwt = new Jwt("dummyToken", Instant.now(), Instant.now().plusSeconds(60), claims, claims);
+        return jwt;
+    }
+
+    private Jwt createFullMockJwtToken(String role, String email, String givenName, String surName, String orgid) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", List.of("authenticated", role));
+        claims.put("email", email);
+        claims.put("givenname", givenName);
+        claims.put("surname", surName);
+        claims.put("organizationid", orgid);
         Jwt jwt = new Jwt("dummyToken", Instant.now(), Instant.now().plusSeconds(60), claims, claims);
         return jwt;
     }
