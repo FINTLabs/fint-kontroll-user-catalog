@@ -42,7 +42,7 @@ public class ExternalUser {
                 .builder()
                 .id(id)
                 .firstName(firstName)
-                .lastName(lastName + " (ekstern)")
+                .lastName(lastName + " (ekstern" + email.split("@")[1] + ")")
                 .userType("EXTERNAL")
                 .resourceId(String.valueOf(idpUserObjectId))
                 .userName(userName)
