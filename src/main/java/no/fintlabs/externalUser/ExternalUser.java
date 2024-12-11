@@ -37,12 +37,12 @@ public class ExternalUser {
     }
 
     public User toUser(){
-
+        String lastnameSuffix = email != null && !email.isEmpty() ? " (ekstern " + email.split("@")[1] + ")" : " (ekstern)";
         return User
                 .builder()
                 .id(id)
                 .firstName(firstName)
-                .lastName(lastName + " (ekstern" + email.split("@")[1] + ")")
+                .lastName(lastName + lastnameSuffix)
                 .userType("EXTERNAL")
                 .resourceId(String.valueOf(idpUserObjectId))
                 .userName(userName)
