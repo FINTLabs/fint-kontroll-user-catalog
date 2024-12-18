@@ -3,6 +3,7 @@ package no.fintlabs.user;
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.AuthRole;
+import no.fintlabs.opa.model.MenuItem;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -75,13 +76,15 @@ public class UserController {
         FintJwtEndUserPrincipal principal = FintJwtEndUserPrincipal.from(jwt);
 
         List<AuthRole> userRoles = authorizationClient.getUserRoles();
+        List<MenuItem> menuItems = authorizationClient.getMenuItems();
 
         LoggedOnUser loggedOnUser = new LoggedOnUser(
                 principal.getGivenName(),
                 principal.getSurname(),
                 principal.getOrgId(),
                 principal.getMail(),
-                userRoles
+                userRoles,
+                menuItems
         );
 
         return new ResponseEntity<>(loggedOnUser, HttpStatus.OK);
