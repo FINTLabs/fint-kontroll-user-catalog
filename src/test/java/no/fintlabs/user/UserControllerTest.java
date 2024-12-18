@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.ServletException;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.AuthRole;
+import no.fintlabs.opa.model.MenuItem;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,6 +73,7 @@ public class UserControllerTest {
         createSecurityContext(jwt, role);
 
         when(authorizationClient.getUserRoles()).thenReturn(List.of(new AuthRole("sa", "Systemadministrator")));
+        when(authorizationClient.getMenuItems()).thenReturn(List.of(new MenuItem("/test/url", "Test menuitem")));
 
         mockMvc.perform(get("/api/users/me"))
                 .andExpect(status().isOk())
@@ -81,9 +83,12 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.organisationId").value("89898989"))
                 .andExpect(jsonPath("$.roles").isArray())
                 .andExpect(jsonPath("$.roles[0].id").value("sa"))
-                .andExpect(jsonPath("$.roles[0].name").value("Systemadministrator"));
+                .andExpect(jsonPath("$.roles[0].name").value("Systemadministrator"))
+                .andExpect(jsonPath("$.menuItems[0].text").value("Test menuitem"))
+                .andExpect(jsonPath("$.menuItems[0].url").value("/test/url"));
 
         verify(authorizationClient, times(1)).getUserRoles();
+        verify(authorizationClient, times(1)).getMenuItems();
     }
 
     @Test

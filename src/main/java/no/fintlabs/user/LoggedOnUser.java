@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import no.fintlabs.opa.model.AuthRole;
+import no.fintlabs.opa.model.MenuItem;
 
 import java.util.List;
 
@@ -18,4 +19,5 @@ public class LoggedOnUser {
     String organisationId;
     String mail;
     List<AuthRole> roles;
+    List<MenuItem> menuItems;
 }
