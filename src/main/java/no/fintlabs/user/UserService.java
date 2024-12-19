@@ -84,11 +84,10 @@ public class UserService {
     }
 
 
-
     public List<SimpleUser> getSimpleUsersUsingSpec(
             String search,
             List<String> orgUnits,
-            String userType
+            List<String> userType
     ){
         UserSpesificationBuilder userSpesification = new UserSpesificationBuilder(search,orgUnits,userType);
         List<User> userList = userRepository.findAll(userSpesification.build());

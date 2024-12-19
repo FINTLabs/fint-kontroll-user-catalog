@@ -27,15 +27,14 @@ public class ResponseFactory {
             FintJwtEndUserPrincipal principal,
             String search,
             List<String> orgUnits,
-            String userType,
+            List<String> userType,
             int page,
             int size
     ) {
-       List<SimpleUser> simpleUsers = userService.getSimpleUsersUsingSpec(search,orgUnits,userType);
-        ResponseEntity<Map<String,Object>> entity = toResponseEntity(
-                toPage(simpleUsers,PageRequest.of(page, size)));
+        List<SimpleUser> simpleUsers = userService.getSimpleUsersUsingSpec(search,orgUnits,userType);
 
-        return entity;
+        return toResponseEntity(
+                toPage(simpleUsers,PageRequest.of(page, size)));
     }
 
     public ResponseEntity<Map<String, Object>> toResponseEntity(Page<SimpleUser> userPage) {

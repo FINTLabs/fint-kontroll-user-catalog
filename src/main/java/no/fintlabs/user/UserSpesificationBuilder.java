@@ -13,9 +13,9 @@ public class UserSpesificationBuilder {
 
     private final String search;
     private final List<String> orgUnits;
-    private final String userType;
+    private final List<String> userType;
 
-    public UserSpesificationBuilder(String search, List<String> orgUnits, String userType) {
+    public UserSpesificationBuilder(String search, List<String> orgUnits, List<String> userType) {
         this.search = search;
         this.orgUnits = orgUnits;
         this.userType = userType;
@@ -33,22 +33,22 @@ public class UserSpesificationBuilder {
         if (!search.isEmpty()) {
             userSpec = userSpec.and(usersNameLike(search));
         }
-        if (!userType.equals("ALLTYPES")) {
-            userSpec = userSpec.and(userTypeEquals(userType.toLowerCase()));
+
+        if (!userType.contains("ALLTYPES")) {
+            userSpec = userSpec.and(userTypeEquals(userType));
         }
 
         return userSpec;
     }
 
     private Specification<User> allAutorizedOrgUnits(List<String> orgUnits) {
-
         return (root, query, criteriaBuilder) -> criteriaBuilder
                 .in(root.get("mainOrganisationUnitId")).value(orgUnits);
     }
 
-    private Specification<User> userTypeEquals(String userType) {
+    private Specification<User> userTypeEquals(List<String> userType) {
         return (root, query, criteriaBuilder) -> criteriaBuilder
-                .equal(criteriaBuilder.lower(root.get("userType")), userType);
+                .in(root.get("userType")).value(userType);
     }
 
 

@@ -44,7 +44,7 @@ public class UserController {
     public ResponseEntity<Map<String, Object>> getSimpleUsers(@AuthenticationPrincipal Jwt jwt,
                                                               @RequestParam(value = "search", defaultValue = "%") String search,
                                                               @RequestParam(value = "orgUnits", required = false) List<String> orgUnits,
-                                                              @RequestParam(value = "userType", defaultValue = "ALLTYPES") String userType,
+                                                              @RequestParam(value = "userType", defaultValue = "ALLTYPES") List<String> userType,
                                                               @RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
     ) {
