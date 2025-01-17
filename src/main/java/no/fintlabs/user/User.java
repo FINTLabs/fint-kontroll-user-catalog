@@ -85,6 +85,7 @@ public class User {
                 .organisationUnitName(mainOrganisationUnitName)
                 .mobilePhone(mobilePhone)
                 .email(email)
+                .userType(userType)
                 .build();
     }
 }

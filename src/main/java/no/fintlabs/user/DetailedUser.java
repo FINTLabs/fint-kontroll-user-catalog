@@ -16,6 +16,7 @@ public class DetailedUser {
     private String organisationUnitName;
     private String mobilePhone;
     private String email;
+    private String userType;
 
     @JsonIgnore
     public boolean isValid(){
