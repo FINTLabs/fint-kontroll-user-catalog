@@ -73,7 +73,7 @@ public class UserControllerTest {
         createSecurityContext(jwt, role);
 
         when(authorizationClient.getUserRoles()).thenReturn(List.of(new AuthRole("sa", "Systemadministrator")));
-        when(authorizationClient.getMenuItems()).thenReturn(List.of(new MenuItem("/test/url", "Test menuitem")));
+        when(authorizationClient.getMenuItems()).thenReturn(List.of(new MenuItem("/test/url", "Test menuitem", 1)));
 
         mockMvc.perform(get("/api/users/me"))
                 .andExpect(status().isOk())
@@ -85,7 +85,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.roles[0].id").value("sa"))
                 .andExpect(jsonPath("$.roles[0].name").value("Systemadministrator"))
                 .andExpect(jsonPath("$.menuItems[0].text").value("Test menuitem"))
-                .andExpect(jsonPath("$.menuItems[0].url").value("/test/url"));
+                .andExpect(jsonPath("$.menuItems[0].url").value("/test/url"))
+                .andExpect(jsonPath("$.menuItems[0].sortOrder").value(1));
 
         verify(authorizationClient, times(1)).getUserRoles();
         verify(authorizationClient, times(1)).getMenuItems();
