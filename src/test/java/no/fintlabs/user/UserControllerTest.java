@@ -73,7 +73,9 @@ public class UserControllerTest {
         createSecurityContext(jwt, role);
 
         when(authorizationClient.getUserRoles()).thenReturn(List.of(new AuthRole("sa", "Systemadministrator")));
+
         when(authorizationClient.getMenuItems()).thenReturn(List.of(new MenuItem("/test/url", "Test menuitem", 1)));
+
 
         mockMvc.perform(get("/api/users/me"))
                 .andExpect(status().isOk())
