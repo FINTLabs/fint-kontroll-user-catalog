@@ -15,7 +15,6 @@ public class ExternalUserService {
         this.userService = userService;
     }
 
-
     public void convertAndSaveAsUser(ExternalUser externalUser) {
         User convertedExternalUser = externalUser.toUser();
         userService.save(convertedExternalUser);
