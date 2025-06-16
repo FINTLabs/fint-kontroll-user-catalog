@@ -79,10 +79,8 @@ public class UserService {
     }
 
     public Optional<User> getUserById(Long id) {
-        return
-                userRepository.findById(id);
+        return userRepository.findById(id);
     }
-
 
     public List<SimpleUser> getSimpleUsersUsingSpec(
             String search,
