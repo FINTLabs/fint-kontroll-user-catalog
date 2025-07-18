@@ -7,17 +7,12 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Getter
 @Setter
@@ -27,6 +22,7 @@ import java.util.UUID;
 @Slf4j
 @Entity
 @Table(name = "\"users\"")
+@EqualsAndHashCode
 public class User {
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,8 +44,8 @@ public class User {
     @Column(name="mainorganisationunitid")
     private String mainOrganisationUnitId;
     @ElementCollection
+    @Builder.Default
     private List<String> organisationUnitIds = new ArrayList<>();
-
     @Column(name="mobilephone")
     private String mobilePhone;
     @Column(name ="email")
@@ -69,7 +65,7 @@ public class User {
         return SimpleUser
                 .builder()
                 .id(id)
-                .fullName(firstName + " " + lastName)
+                .fullName(Stream.of(firstName, lastName).filter(Objects::nonNull).collect(Collectors.joining(" ")))
                 .userType(userType)
                 .organisationUnitName(mainOrganisationUnitName)
                 .organisationUnitId(mainOrganisationUnitId)
@@ -80,7 +76,7 @@ public class User {
         return DetailedUser
                 .builder()
                 .id(id)
-                .fullName(firstName + " " + lastName)
+                .fullName(Stream.of(firstName, lastName).filter(Objects::nonNull).collect(Collectors.joining(" ")))
                 .userName(userName)
                 .organisationUnitName(mainOrganisationUnitName)
                 .mobilePhone(mobilePhone)
