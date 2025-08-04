@@ -48,6 +48,7 @@ public class User {
     @Column(name="mainorganisationunitid")
     private String mainOrganisationUnitId;
     @ElementCollection
+    @Builder.Default
     private List<String> organisationUnitIds = new ArrayList<>();
 
     @Column(name="mobilephone")

@@ -1,7 +1,9 @@
 package no.fintlabs.user;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.tracing.Tracer;
 import jakarta.servlet.ServletException;
+import no.fintlabs.ProblemDetailFactory;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.AuthRole;
 import no.fintlabs.opa.model.MenuItem;
@@ -58,6 +60,12 @@ public class UserControllerTest {
 
     @Autowired
     private WebApplicationContext context;
+
+    @MockBean
+    private Tracer tracer;
+
+    @MockBean
+    private ProblemDetailFactory problemDetailFactory;
 
     @BeforeEach
     public void setup() {
