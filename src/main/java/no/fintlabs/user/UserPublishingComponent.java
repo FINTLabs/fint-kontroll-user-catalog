@@ -30,6 +30,6 @@ public class UserPublishingComponent {
             log.info("No users to publish");
             return;
         }
-        userEntityProducerService.publishAllKontrollUsers(triggerType, allUsers);
+        userEntityProducerService.publishKontrollUsers(triggerType, allUsers);
     }
 }

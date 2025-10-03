@@ -39,11 +39,11 @@ public class UserEntityProducerService {
         );
     }
 
-    public int publishAllKontrollUsers(String triggerType, List<User> allUsers){
-        log.info("Republishing all {} kontrollusers triggered by {}", allUsers.size(), triggerType);
+    public int publishKontrollUsers(String triggerType, List<User> users){
+        log.info("Republishing all {} kontrollusers triggered by {}", users.size(), triggerType);
 
-        allUsers.forEach(this::publish);
-        log.info("Republishing all {} kontrollusers triggered by {} done", allUsers.size(), triggerType);
-        return allUsers.size();
+        users.forEach(this::publish);
+        log.info("Republishing all {} kontrollusers triggered by {} done", users.size(), triggerType);
+        return users.size();
     }
 }

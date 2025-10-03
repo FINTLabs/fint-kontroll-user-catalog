@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.AuthRole;
 import no.fintlabs.opa.model.MenuItem;
+import no.fintlabs.util.OnlyDevelopers;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Map;
@@ -90,11 +90,9 @@ public class UserController {
         return new ResponseEntity<>(loggedOnUser, HttpStatus.OK);
     }
 
+    @OnlyDevelopers
     @PostMapping("/republish")
     public ResponseEntity<Map<String,Object>> republishKontrollUsers(@AuthenticationPrincipal Jwt jwt) {
-        if (!authorizationClient.isAdmin()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "User does not have access to republish all kontrollusers");
-        }
 
         String triggerType = "admin (" + FintJwtEndUserPrincipal.from(jwt).getMail() + ") request";
         List<User> allUsers = userService.getAllUsers();
@@ -103,7 +101,7 @@ public class UserController {
             log.info("No users found to publish");
             return responseFactory.toResponseEntity("No users found to publish");
         }
-        int noOfPublishedUsers = userEntityProducerService.publishAllKontrollUsers(triggerType, allUsers);
+        int noOfPublishedUsers = userEntityProducerService.publishKontrollUsers(triggerType, allUsers);
 
         return responseFactory.toResponseEntity("Republished " + noOfPublishedUsers + " users");
     }
@@ -130,6 +128,25 @@ public class UserController {
                 .toList();
 
         return ResponseEntity.ok(results);
+    }
+
+    @OnlyDevelopers
+    @PostMapping("/deactivate-old-users")
+    public ResponseEntity<Map<String, Object>> deactivateOldUsers(@AuthenticationPrincipal Jwt jwt) {
+        String email = (jwt != null) ? FintJwtEndUserPrincipal.from(jwt).getMail() : "unknown";
+        String triggerType = "admin (" + email + ") request";
+        List<User> deactivatedUsers = userService.deactivateOldUsers();
+        if (deactivatedUsers.isEmpty()) {
+            log.info("No users found to deactivate");
+            return ResponseEntity.noContent().build();
+        }
+        int count = userEntityProducerService.publishKontrollUsers(triggerType, deactivatedUsers);
+
+        return ResponseEntity.ok(Map.of(
+                "message", "Users deactivated and published",
+                "deactivated", count,
+                "triggeredBy", email
+        ));
     }
 
 }
