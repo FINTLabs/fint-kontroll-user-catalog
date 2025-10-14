@@ -69,6 +69,7 @@ public class User {
                 .userType(userType)
                 .organisationUnitName(mainOrganisationUnitName)
                 .organisationUnitId(mainOrganisationUnitId)
+                .userName(userName)
                 .build();
     }
 
