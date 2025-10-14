@@ -12,4 +12,5 @@ public class SimpleUser {
     private String organisationUnitName;
     private String organisationUnitId;
     private String userType;
+    private String userName;
 }
