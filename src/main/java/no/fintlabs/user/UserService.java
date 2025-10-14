@@ -6,6 +6,7 @@ import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -64,16 +65,15 @@ public class UserService {
         User requestedUser = getUserById(id).orElse(new User());
         String requestedUserOrgID = requestedUser.getMainOrganisationUnitId();
 
-        boolean requestedOrgIDInScope = allAuthorizedOrgIDs.contains(requestedUserOrgID )
+        boolean requestedOrgIDInScope = allAuthorizedOrgIDs.contains(requestedUserOrgID)
                 || allAuthorizedOrgIDs.contains(OrgUnitType.ALLORGUNITS.name());
 
-        if (requestedOrgIDInScope){
+        if (requestedOrgIDInScope) {
             DetailedUser requestedDetailedUser = requestedUser.toDetailedUser();
-            log.info("User "+principal.getMail()+" has access to users in orgID: " + requestedUserOrgID);
+            log.info("User " + principal.getMail() + " has access to users in orgID: " + requestedUserOrgID);
             return requestedDetailedUser;
-        }
-        else {
-            log.info("User "+ principal.getMail() +" are not granted access to users in orgID: " + requestedUserOrgID);
+        } else {
+            log.info("User " + principal.getMail() + " are not granted access to users in orgID: " + requestedUserOrgID);
             return new DetailedUser();
         }
     }
@@ -86,8 +86,8 @@ public class UserService {
             String search,
             List<String> orgUnits,
             List<String> userType
-    ){
-        UserSpesificationBuilder userSpesification = new UserSpesificationBuilder(search,orgUnits,userType);
+    ) {
+        UserSpesificationBuilder userSpesification = new UserSpesificationBuilder(search, orgUnits, userType);
         List<User> userList = userRepository.findAll(userSpesification.build());
 
         return userList.stream()
@@ -116,12 +116,30 @@ public class UserService {
     public List<String> compareRequestedOrgUnitIDsWithOPA(List<String> requestedOgUnits) {
         List<String> orgUnitsfromOPA = getAllAutorizedOrgUnitIDs();
 
-        if (orgUnitsfromOPA.contains(OrgUnitType.ALLORGUNITS.name())){
+        if (orgUnitsfromOPA.contains(OrgUnitType.ALLORGUNITS.name())) {
             return requestedOgUnits;
         }
 
         return orgUnitsfromOPA.stream()
                 .filter(requestedOgUnits::contains)
                 .toList();
+    }
+
+    public List<User> deactivateOldUsers() {
+        Instant now = Instant.now();
+        List<User> outdatedUsers = userRepository.findAll().stream().filter(
+                user -> isOutdated(user, now)
+        ).toList();
+
+        outdatedUsers.forEach(user -> {
+            user.setStatus(UserStatus.INACTIVE.name());
+            log.info("User with id: {} was valid until {} and will be deactivated", user.getId(), user.getValidTo());
+        });
+        userRepository.saveAll(outdatedUsers);
+        return outdatedUsers;
+    }
+
+    private boolean isOutdated(User user, Instant now) {
+        return user.getValidTo() != null && user.getValidTo().toInstant().isBefore(now);
     }
 }
