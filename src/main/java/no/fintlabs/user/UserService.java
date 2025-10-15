@@ -87,7 +87,7 @@ public class UserService {
             List<String> orgUnits,
             List<String> userType
     ) {
-        UserSpesificationBuilder userSpesification = new UserSpesificationBuilder(search, orgUnits, userType);
+        UserSpecificationBuilder userSpesification = new UserSpecificationBuilder(search, orgUnits, userType);
         List<User> userList = userRepository.findAll(userSpesification.build());
 
         return userList.stream()
