@@ -9,13 +9,13 @@ import java.util.List;
 
 
 @Slf4j
-public class UserSpesificationBuilder {
+public class UserSpecificationBuilder {
 
     private final String search;
     private final List<String> orgUnits;
     private final List<String> userType;
 
-    public UserSpesificationBuilder(String search, List<String> orgUnits, List<String> userType) {
+    public UserSpecificationBuilder(String search, List<String> orgUnits, List<String> userType) {
         this.search = search;
         this.orgUnits = orgUnits;
         this.userType = userType;
@@ -31,13 +31,12 @@ public class UserSpesificationBuilder {
         }
 
         if (!search.isEmpty()) {
-            userSpec = userSpec.and(usersNameLike(search));
+            userSpec = userSpec.and(firstNameLastNameOrUserNameLike(search));
         }
 
         if (!userType.contains("ALLTYPES")) {
             userSpec = userSpec.and(userTypeEquals(userType));
         }
-
         return userSpec;
     }
 
@@ -52,22 +51,23 @@ public class UserSpesificationBuilder {
     }
 
 
-    private Specification<User> usersNameLike(String search) {
+    private Specification<User> firstNameLastNameOrUserNameLike(String search) {
         return (root, query, criteriaBuilder) -> {
             String[] searchParts = search.toLowerCase().split("\\s+");
-
             List<Predicate> predicates = new ArrayList<>();
 
             for (String part : searchParts) {
+                if (part.isBlank()) continue;
                 String searchPattern = "%" + part + "%";
+
                 predicates.add(criteriaBuilder.or(
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("firstName")), searchPattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern)
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("lastName")), searchPattern),
+                        criteriaBuilder.like(criteriaBuilder.lower(root.get("userName")), searchPattern)
                 ));
             }
 
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
-
 }
