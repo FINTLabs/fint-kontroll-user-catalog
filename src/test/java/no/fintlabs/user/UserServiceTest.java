@@ -174,23 +174,23 @@ public class UserServiceTest {
                 .build();
 
         User inputUser = User.builder()
-                .identityProviderUserObjectId(existingUser.getIdentityProviderUserObjectId())
+                .identityProviderUserObjectId(UUID.fromString("3f2b9b63-47e9-43c2-9d61-dd078d123479"))
                 .resourceId(existingUser.getResourceId())
                 .build();
 
         User updatedUser = User.builder()
                 .id(1L)
-                .identityProviderUserObjectId(existingUser.getIdentityProviderUserObjectId())
+                .identityProviderUserObjectId(inputUser.getIdentityProviderUserObjectId())
                 .resourceId(existingUser.getResourceId())
                 .build();
 
         when(userRepository.findUserByResourceIdEqualsIgnoreCase(existingUser.getResourceId()))
                 .thenReturn(Optional.of(existingUser));
-        when(userRepository.save(inputUser)).thenReturn(updatedUser);
+        when(userRepository.save(existingUser)).thenReturn(updatedUser);
 
         userService.save(inputUser);
 
-        verify(userRepository).save(inputUser);
+        verify(userRepository).save(existingUser);
         verify(userEntityProducerService).publish(updatedUser);
     }
 

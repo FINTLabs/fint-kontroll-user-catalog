@@ -46,8 +46,6 @@ public class User {
     @ElementCollection
     @Builder.Default
     private List<String> organisationUnitIds = new ArrayList<>();
-    @Column(name="mobilephone")
-    private String mobilePhone;
     @Column(name ="email")
     private String email;
     @Column(name="managerref")
@@ -80,7 +78,6 @@ public class User {
                 .fullName(Stream.of(firstName, lastName).filter(Objects::nonNull).collect(Collectors.joining(" ")))
                 .userName(userName)
                 .organisationUnitName(mainOrganisationUnitName)
-                .mobilePhone(mobilePhone)
                 .email(email)
                 .userType(userType)
                 .build();
