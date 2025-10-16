@@ -5,16 +5,18 @@ import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
+
+import static no.fintlabs.user.UserStatus.INVALID;
 
 
 @Service
 @Slf4j
+@Transactional
 public class UserService {
     private final UserRepository userRepository;
     private final UserEntityProducerService userEntityProducerService;
@@ -42,19 +44,20 @@ public class UserService {
 
     private Runnable onSaveNewUser(User user) {
         return () -> {
-            User newUser = userRepository.save(user);
-            log.info("Create new user: {}", user.getId());
-            log.info("Created kontrollUser: {}", newUser.getIdentityProviderUserObjectId());
-            userEntityProducerService.publish(newUser);
+            if (!UserStatus.INVALID.equals(user.getStatus())) {
+                User saved = userRepository.save(user);
+                log.info("Create new user: {}, with IdentityProviderUserObjectId:", saved.getId(), saved.getIdentityProviderUserObjectId());
+                userEntityProducerService.publish(saved);
+            }
+
         };
     }
 
-    private Consumer<User> onSaveExistingUser(User user) {
+    private Consumer<User> onSaveExistingUser(User incomingUser) {
         return existingUser -> {
-            user.setId(existingUser.getId());
-            log.debug("Update user: {}", user.getId());
-            User savedUser = userRepository.save(user);
-            log.debug("update kontrollUser: {}", savedUser.getIdentityProviderUserObjectId());
+            mapFromIncomingUser(existingUser, incomingUser);
+            log.debug("Update user: {}", existingUser.getId());
+            User savedUser = userRepository.save(existingUser);
             userEntityProducerService.publish(savedUser);
         };
     }
@@ -91,7 +94,7 @@ public class UserService {
         List<User> userList = userRepository.findAll(userSpesification.build());
 
         return userList.stream()
-                .filter(user -> user.getStatus().equals("ACTIVE"))
+                .filter(user -> user.getStatus().equals(UserStatus.ACTIVE))
                 .map(User::toSimpleUser)
                 .toList();
     }
@@ -125,14 +128,40 @@ public class UserService {
                 .toList();
     }
 
+
+    public static void mapFromIncomingUser(User existing, User incoming) {
+        if (existing == null || incoming == null) return;
+
+        if(INVALID.equals(incoming.getStatus())) {
+            existing.setStatus(INVALID);
+            return;
+        }
+        existing.setResourceId(incoming.getResourceId());
+        existing.setFirstName(incoming.getFirstName());
+        existing.setLastName(incoming.getLastName());
+        existing.setUserType(incoming.getUserType());
+        existing.setUserName(incoming.getUserName());
+        existing.setIdentityProviderUserObjectId(incoming.getIdentityProviderUserObjectId());
+        existing.setMainOrganisationUnitName(incoming.getMainOrganisationUnitName());
+        existing.setMainOrganisationUnitId(incoming.getMainOrganisationUnitId());
+        existing.setOrganisationUnitIds(incoming.getOrganisationUnitIds() == null
+                ? new ArrayList<>()
+                : new ArrayList<>(incoming.getOrganisationUnitIds()));
+        existing.setEmail(incoming.getEmail());
+        existing.setManagerRef(incoming.getManagerRef());
+        existing.setStatus(incoming.getStatus());
+        existing.setStatusChanged(incoming.getStatusChanged());
+        existing.setValidFrom(incoming.getValidFrom());
+        existing.setValidTo(incoming.getValidTo());
+    }
+
     public List<User> deactivateOldUsers() {
         Instant now = Instant.now();
         List<User> outdatedUsers = userRepository.findAll().stream().filter(
-                user -> isOutdated(user, now)
-        ).toList();
+                user -> isOutdated(user, now)).toList();
 
         outdatedUsers.forEach(user -> {
-            user.setStatus(UserStatus.INACTIVE.name());
+            user.setStatus(UserStatus.DISABLED);
             log.info("User with id: {} was valid until {} and will be deactivated", user.getId(), user.getValidTo());
         });
         userRepository.saveAll(outdatedUsers);
