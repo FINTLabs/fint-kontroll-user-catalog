@@ -37,6 +37,7 @@ public class UserService {
     }
 
     public void save(User user) {
+        log.info("Received user with resourceId: {}", user.getResourceId());
         userRepository
                 .findUserByResourceIdEqualsIgnoreCase(user.getResourceId())
                 .ifPresentOrElse(onSaveExistingUser(user), onSaveNewUser(user));

@@ -30,6 +30,7 @@ public class UserEntityProducerService {
 
     public void publish(User user){
         String key = user.getResourceId();
+        log.info("Publishing user with resourceId: {}", user.getResourceId());
         entityProducer.send(
                 EntityProducerRecord.<User>builder()
                         .topicNameParameters(entityTopicNameParameters)
