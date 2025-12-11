@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,20 +44,32 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<Map<String, Object>> getSimpleUsers(@AuthenticationPrincipal Jwt jwt,
                                                               @RequestParam(value = "search", defaultValue = "%") String search,
-                                                              @RequestParam(value = "orgUnits", required = false) List<String> orgUnits,
+                                                              @RequestParam(value = "orgUnits", required = false) List<String> requestedOrgUnits,
+                                                              @RequestParam(value = "validOrgUnits", required = false) List<String> validOrgUnits,
                                                               @RequestParam(value = "userType", defaultValue = "ALLTYPES") List<String> userType,
                                                               @RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
     ) {
 
-        log.info("Finding users with search: {} with orgUnitIDs: {} with UserType: {}", search, orgUnits, userType);
+        log.info("Finding users with search: {} with orgUnitIDs: {} with UserType: {}", search, requestedOrgUnits, userType);
 
-        if (orgUnits == null) {
+        if (requestedOrgUnits == null) {
             List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAllAutorizedOrgUnitIDs();
             log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: {}", allAuthorizedOrgUnitIDsFromOPA);
-            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, allAuthorizedOrgUnitIDsFromOPA, userType, page, size);
+
+            List<String> validAndAuthorizedOrgUnits = new ArrayList<>(allAuthorizedOrgUnitIDsFromOPA);
+
+            if (!(validOrgUnits == null || validOrgUnits.isEmpty())) {
+                validAndAuthorizedOrgUnits.retainAll(validOrgUnits);
+            }
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, validAndAuthorizedOrgUnits, userType, page, size);
         } else {
-            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, userService.compareRequestedOrgUnitIDsWithOPA(orgUnits), userType, page, size);
+            List<String> validAndRequestedOrgUnits = new ArrayList<>(requestedOrgUnits);
+
+            if (!(validOrgUnits == null || validOrgUnits.isEmpty())) {
+                validAndRequestedOrgUnits.retainAll(validOrgUnits);
+            }
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, userService.compareRequestedOrgUnitIDsWithOPA(validAndRequestedOrgUnits), userType, page, size);
         }
     }
 
@@ -93,6 +106,7 @@ public class UserController {
     @OnlyDevelopers
     @PostMapping("/republish")
     public ResponseEntity<Map<String,Object>> republishKontrollUsers(@AuthenticationPrincipal Jwt jwt) {
+        //
 
         String triggerType = "admin (" + FintJwtEndUserPrincipal.from(jwt).getMail() + ") request";
         List<User> allUsers = userService.getAllUsers();
