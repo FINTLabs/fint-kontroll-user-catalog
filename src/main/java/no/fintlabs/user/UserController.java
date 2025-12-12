@@ -57,18 +57,10 @@ public class UserController {
             List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAllAutorizedOrgUnitIDs();
             log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: {}", allAuthorizedOrgUnitIDsFromOPA);
 
-            List<String> validAndAuthorizedOrgUnits = new ArrayList<>(allAuthorizedOrgUnitIDsFromOPA);
-
-            if (!(validOrgUnits == null || validOrgUnits.isEmpty())) {
-                validAndAuthorizedOrgUnits.retainAll(validOrgUnits);
-            }
+            List<String> validAndAuthorizedOrgUnits = getIntersection(allAuthorizedOrgUnitIDsFromOPA, validOrgUnits);
             return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, validAndAuthorizedOrgUnits, userType, page, size);
         } else {
-            List<String> validAndRequestedOrgUnits = new ArrayList<>(requestedOrgUnits);
-
-            if (!(validOrgUnits == null || validOrgUnits.isEmpty())) {
-                validAndRequestedOrgUnits.retainAll(validOrgUnits);
-            }
+            List<String> validAndRequestedOrgUnits = getIntersection(requestedOrgUnits, validOrgUnits);
             return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, userService.compareRequestedOrgUnitIDsWithOPA(validAndRequestedOrgUnits), userType, page, size);
         }
     }
@@ -162,5 +154,16 @@ public class UserController {
                 "triggeredBy", email
         ));
     }
+    public static List<String> getIntersection(List<String> orgUnits, List<String> validOrgUnits) {
 
+        if (validOrgUnits ==null || validOrgUnits.isEmpty()) {
+            return orgUnits;
+        }
+        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name())) {
+            return validOrgUnits;
+        }
+        List<String> intersection = new ArrayList<>(orgUnits);
+        intersection.retainAll(validOrgUnits);
+        return intersection;
+    }
 }
