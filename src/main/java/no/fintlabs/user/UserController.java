@@ -51,11 +51,11 @@ public class UserController {
                                                               @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
     ) {
 
-        log.info("Finding users with search: {} with orgUnitIDs: {} with UserType: {}", search, requestedOrgUnits, userType);
+        log.debug("Finding users with search: {} with requested orgUnits: {} valid org units {} with UserType: {}", search, requestedOrgUnits, validOrgUnits, userType);
 
         if (requestedOrgUnits == null) {
             List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAllAutorizedOrgUnitIDs();
-            log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: {}", allAuthorizedOrgUnitIDsFromOPA);
+            log.debug("No orgUnits specified from frontend. Authorized orgUnitIDs from OPA: {}", allAuthorizedOrgUnitIDsFromOPA);
 
             List<String> validAndAuthorizedOrgUnits = getIntersection(allAuthorizedOrgUnitIDsFromOPA, validOrgUnits);
             return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, validAndAuthorizedOrgUnits, userType, page, size);
@@ -155,15 +155,18 @@ public class UserController {
         ));
     }
     public static List<String> getIntersection(List<String> orgUnits, List<String> validOrgUnits) {
-
+        log.debug("Getting intersection of {} and {}", orgUnits,  validOrgUnits);
         if (validOrgUnits ==null || validOrgUnits.isEmpty()) {
+            log.debug("No valid orgUnits found, returning orgUnits");
             return orgUnits;
         }
         if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name())) {
+            log.debug("org unit list contains ALLORGUNITS, returning valid orgUnits");
             return validOrgUnits;
         }
         List<String> intersection = new ArrayList<>(orgUnits);
         intersection.retainAll(validOrgUnits);
+        log.debug("Both orgUnits and validOrgUnits are non empty subsets. Returning the actual intersection");
         return intersection;
     }
 }
