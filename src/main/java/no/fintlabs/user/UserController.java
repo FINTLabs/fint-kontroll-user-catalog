@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -43,20 +44,24 @@ public class UserController {
     @GetMapping()
     public ResponseEntity<Map<String, Object>> getSimpleUsers(@AuthenticationPrincipal Jwt jwt,
                                                               @RequestParam(value = "search", defaultValue = "%") String search,
-                                                              @RequestParam(value = "orgUnits", required = false) List<String> orgUnits,
+                                                              @RequestParam(value = "orgUnits", required = false) List<String> requestedOrgUnits,
+                                                              @RequestParam(value = "validOrgUnits", required = false) List<String> validOrgUnits,
                                                               @RequestParam(value = "userType", defaultValue = "ALLTYPES") List<String> userType,
                                                               @RequestParam(defaultValue = "0") int page,
                                                               @RequestParam(defaultValue = "${fint.kontroll.user-catalog.pagesize:20}") int size
     ) {
 
-        log.info("Finding users with search: {} with orgUnitIDs: {} with UserType: {}", search, orgUnits, userType);
+        log.debug("Finding users with search: {} with requested orgUnits: {} valid org units {} with UserType: {}", search, requestedOrgUnits, validOrgUnits, userType);
 
-        if (orgUnits == null) {
+        if (requestedOrgUnits == null) {
             List<String> allAuthorizedOrgUnitIDsFromOPA = userService.getAllAutorizedOrgUnitIDs();
-            log.info("No orgUnits spesified. Returning users from all authorized orgUnits. Authorized orgUnitIDs: {}", allAuthorizedOrgUnitIDsFromOPA);
-            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, allAuthorizedOrgUnitIDsFromOPA, userType, page, size);
+            log.debug("No orgUnits specified from frontend. Authorized orgUnitIDs from OPA: {}", allAuthorizedOrgUnitIDsFromOPA);
+
+            List<String> validAndAuthorizedOrgUnits = getIntersection(allAuthorizedOrgUnitIDsFromOPA, validOrgUnits);
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, validAndAuthorizedOrgUnits, userType, page, size);
         } else {
-            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, userService.compareRequestedOrgUnitIDsWithOPA(orgUnits), userType, page, size);
+            List<String> validAndRequestedOrgUnits = getIntersection(requestedOrgUnits, validOrgUnits);
+            return responseFactory.toResponseEntity(FintJwtEndUserPrincipal.from(jwt), search, userService.compareRequestedOrgUnitIDsWithOPA(validAndRequestedOrgUnits), userType, page, size);
         }
     }
 
@@ -93,6 +98,7 @@ public class UserController {
     @OnlyDevelopers
     @PostMapping("/republish")
     public ResponseEntity<Map<String,Object>> republishKontrollUsers(@AuthenticationPrincipal Jwt jwt) {
+        //
 
         String triggerType = "admin (" + FintJwtEndUserPrincipal.from(jwt).getMail() + ") request";
         List<User> allUsers = userService.getAllUsers();
@@ -148,5 +154,19 @@ public class UserController {
                 "triggeredBy", email
         ));
     }
-
+    public static List<String> getIntersection(List<String> orgUnits, List<String> validOrgUnits) {
+        log.debug("Getting intersection of {} and {}", orgUnits,  validOrgUnits);
+        if (validOrgUnits ==null || validOrgUnits.isEmpty()) {
+            log.debug("No valid orgUnits found, returning orgUnits");
+            return orgUnits;
+        }
+        if (orgUnits.contains(OrgUnitType.ALLORGUNITS.name())) {
+            log.debug("org unit list contains ALLORGUNITS, returning valid orgUnits");
+            return validOrgUnits;
+        }
+        List<String> intersection = new ArrayList<>(orgUnits);
+        intersection.retainAll(validOrgUnits);
+        log.debug("Both orgUnits and validOrgUnits are non empty subsets. Returning the actual intersection");
+        return intersection;
+    }
 }

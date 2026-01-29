@@ -34,6 +34,7 @@ logging:
   level:
     root: INFO
     org.apache.kafka: INFO
+    no.fintlabs.user.UserController: DEBUG
 
 management:
   endpoints:
