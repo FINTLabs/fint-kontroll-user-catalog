@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.*;
+import no.fintlabs.user.FactoryUser;
 import no.fintlabs.user.User;
 
 import java.util.UUID;
@@ -36,9 +37,9 @@ public class ExternalUser {
         return this.getUserType().equals("EXTERNAL");
     }
 
-    public User toUser(){
+    public FactoryUser toFactoryUser(){
         String lastnameSuffix = email != null && !email.isEmpty() ? " (ekstern " + email.split("@")[1] + ")" : " (ekstern)";
-        return User
+        return FactoryUser
                 .builder()
                 .id(id)
                 .firstName(firstName)
@@ -50,7 +51,8 @@ public class ExternalUser {
                 .mainOrganisationUnitName(mainOrganisationUnitName)
                 .mainOrganisationUnitId(mainOrganisationUnitId)
                 .email(email)
-                .status(accountEnabled?"ACTIVE" :"DISABLED")
+                .fintStatus(accountEnabled?"ACTIVE" :"DISABLED")
+                .entraStatus(accountEnabled?"ACTIVE" :"DISABLED")
                 .build();
     }
 
