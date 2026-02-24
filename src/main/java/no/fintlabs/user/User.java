@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Slf4j
 @Entity
 @Table(name = "\"users\"")
@@ -45,7 +45,7 @@ public class User {
     private String mainOrganisationUnitId;
     @ElementCollection
     @Builder.Default
-    private List<String> organisationUnitIds = new ArrayList<>();
+    private Set<String> organisationUnitIds = new HashSet<>();
     @Column(name ="email")
     private String email;
     @Column(name="managerref")
@@ -82,4 +82,5 @@ public class User {
                 .userType(userType)
                 .build();
     }
+
 }

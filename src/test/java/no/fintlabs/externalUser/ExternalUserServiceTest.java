@@ -1,5 +1,6 @@
 package no.fintlabs.externalUser;
 
+import no.fintlabs.user.FactoryUser;
 import no.fintlabs.user.User;
 import no.fintlabs.user.UserService;
 import org.junit.jupiter.api.Test;
@@ -40,9 +41,9 @@ class ExternalUserServiceTest {
                 .resourceId("f37f3048-637a-11ee-8c99-0242ac120002")
                 .build();
 
-        User convertedUser = externalUser.toUser();
+        FactoryUser convertedUser = externalUser.toFactoryUser();
 
-        assertEquals(userToBeConverted.getResourceId(), convertedUser.getResourceId());
+        assertEquals(userToBeConverted.getResourceId(), convertedUser.resourceId());
     }
 
     @Test
@@ -67,9 +68,9 @@ class ExternalUserServiceTest {
                 .resourceId("f37f3048-637a-11ee-8c99-0242ac120002")
                 .build();
 
-        User convertedUser = externalUser.toUser();
+        FactoryUser convertedUser = externalUser.toFactoryUser();
 
-        assertEquals(userToBeConverted.getResourceId(), convertedUser.getResourceId());
+        assertEquals(userToBeConverted.getResourceId(), convertedUser.resourceId());
     }
 
     @Test
@@ -92,9 +93,9 @@ class ExternalUserServiceTest {
                 .resourceId("f37f3048-637a-11ee-8c99-0242ac120002")
                 .build();
 
-        User convertedUser = externalUser.toUser();
+        FactoryUser convertedUser = externalUser.toFactoryUser();
 
-        assertEquals(userToBeConverted.getResourceId(), convertedUser.getResourceId());
+        assertEquals(userToBeConverted.getResourceId(), convertedUser.resourceId());
     }
 
     @Test
@@ -110,7 +111,7 @@ class ExternalUserServiceTest {
 
         externalUserService.convertAndSaveAsUser(externalUser);
 
-        verify(userService).save(externalUser.toUser());
+        verify(userService).save("f37f3048-637a-11ee-8c99-0242ac120002", externalUser.toFactoryUser());
     }
 
 }
