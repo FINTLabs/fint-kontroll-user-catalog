@@ -2,7 +2,6 @@ package no.fintlabs.externalUser;
 
 import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.user.FactoryUser;
-import no.fintlabs.user.User;
 import no.fintlabs.user.UserService;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +15,11 @@ public class ExternalUserService {
         this.userService = userService;
     }
 
-    public void convertAndSaveAsUser(ExternalUser externalUser) {
+    public void convertAndSaveAsUser(String key, ExternalUser externalUser) {
+        if(externalUser == null) {
+            userService.markUserDeleted(key);
+            return;
+        }
         FactoryUser convertedExternalUser = externalUser.toFactoryUser();
         userService.save(convertedExternalUser.resourceId(), convertedExternalUser);
     }

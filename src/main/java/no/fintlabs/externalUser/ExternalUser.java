@@ -24,18 +24,13 @@ public class ExternalUser {
     private String lastName;
     private String userType;
     private String userName;
-    private UUID idpUserObjectId;
+    private UUID userObjectId;
     private String mainOrganisationUnitName;
     private String mainOrganisationUnitId;
     private String mobilePhone;
     private String email;
     private String userPrincipalName;
     private boolean accountEnabled;
-
-
-    public boolean isValid(){
-        return this.getUserType().equals("EXTERNAL");
-    }
 
     public FactoryUser toFactoryUser(){
         String lastnameSuffix = email != null && !email.isEmpty() ? " (ekstern " + email.split("@")[1] + ")" : " (ekstern)";
@@ -45,13 +40,13 @@ public class ExternalUser {
                 .firstName(firstName)
                 .lastName(lastName + lastnameSuffix)
                 .userType("EXTERNAL")
-                .resourceId(String.valueOf(idpUserObjectId))
+                .resourceId(String.valueOf(userObjectId))
                 .userName(userName)
-                .identityProviderUserObjectId(idpUserObjectId)
+                .identityProviderUserObjectId(userObjectId)
                 .mainOrganisationUnitName(mainOrganisationUnitName)
                 .mainOrganisationUnitId(mainOrganisationUnitId)
                 .email(email)
-                .fintStatus(accountEnabled?"ACTIVE" :"DISABLED")
+                .fintStatus("-")
                 .entraStatus(accountEnabled?"ACTIVE" :"DISABLED")
                 .build();
     }

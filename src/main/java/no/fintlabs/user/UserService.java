@@ -46,7 +46,7 @@ public class UserService {
                 .ifPresentOrElse(onSaveExistingUser(user), onSaveNewUser(user));
     }
 
-    private void markUserDeleted(String key) {
+    public void markUserDeleted(String key) {
         userRepository.findUserByResourceIdEqualsIgnoreCase(key).ifPresent(user -> {
             user.setStatus(UserStatus.DELETED);
             userRepository.save(user);

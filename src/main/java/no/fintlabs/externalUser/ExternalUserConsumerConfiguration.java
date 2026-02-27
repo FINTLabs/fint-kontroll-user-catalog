@@ -32,7 +32,7 @@ public class ExternalUserConsumerConfiguration {
         return parameterizedListenerContainerFactoryService.createRecordListenerContainerFactory(
                         ExternalUser.class,
                         (ConsumerRecord<String,ExternalUser> consumerRecord)
-                                -> externalUserService.convertAndSaveAsUser(consumerRecord.value()),
+                                -> externalUserService.convertAndSaveAsUser(consumerRecord.key(), consumerRecord.value()),
                         listenerConfiguration,
                         errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
                                 .stepBuilder()
