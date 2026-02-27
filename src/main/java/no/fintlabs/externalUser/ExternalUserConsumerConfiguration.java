@@ -23,7 +23,7 @@ public class ExternalUserConsumerConfiguration {
         return entityConsumerFactoryService.createFactory(
                         ExternalUser.class,
                         (ConsumerRecord<String,ExternalUser> consumerRecord)
-                                -> externalUserService.convertAndSaveAsUser(consumerRecord.value()))
+                                -> externalUserService.convertAndSaveAsUser(consumerRecord.key(), consumerRecord.value()))
                 .createContainer(entityTopicNameParameters);
 
     }
