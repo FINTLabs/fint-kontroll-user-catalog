@@ -21,7 +21,7 @@ public class DeleteUserJob {
     @Value("${jobs.delete-user.deleted-since-days}")
     private long deletedSinceDays;
 
-    @Scheduled(fixedDelayString = "${jobs.delete-user.interval-cron}")
+    @Scheduled(cron = "${jobs.delete-user.interval-cron}")
     @Transactional
     public void deleteUsersMarkedDeletedLongEnough() {
 
