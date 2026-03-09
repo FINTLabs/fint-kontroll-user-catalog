@@ -29,7 +29,7 @@ class ExternalUserServiceTest {
         ExternalUser externalUser = ExternalUser
                 .builder()
                 .userName("titten@tei.no")
-                .idpUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
+                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
                 .userType("EXTERNAL")
                 .build();
 
@@ -54,7 +54,7 @@ class ExternalUserServiceTest {
                 .firstName("Titten")
                 .lastName("Tei (ekstern tei.no)")
                 .email("titten@tei.no")
-                .idpUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
+                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
                 .userType("EXTERNAL")
                 .build();
 
@@ -80,7 +80,7 @@ class ExternalUserServiceTest {
                 .userName("titten@tei.no")
                 .firstName("Titten")
                 .lastName("Tei (ekstern)")
-                .idpUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
+                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
                 .userType("EXTERNAL")
                 .build();
 
@@ -105,11 +105,11 @@ class ExternalUserServiceTest {
                 .userName("titten@tei.no")
                 .firstName("Titten")
                 .lastName("Tei (ekstern)")
-                .idpUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
+                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
                 .userType("EXTERNAL")
                 .build();
 
-        externalUserService.convertAndSaveAsUser(externalUser);
+        externalUserService.convertAndSaveAsUser("f37f3048-637a-11ee-8c99-0242ac120002", externalUser);
 
         verify(userService).save("f37f3048-637a-11ee-8c99-0242ac120002", externalUser.toFactoryUser());
     }
