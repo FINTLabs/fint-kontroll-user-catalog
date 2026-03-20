@@ -49,6 +49,7 @@ public class UserService {
     public void markUserDeleted(String key) {
         userRepository.findUserByResourceIdEqualsIgnoreCase(key).ifPresent(user -> {
             user.setStatus(UserStatus.DELETED);
+            user.setStatusChanged(Date.from(Instant.now()));
             userRepository.save(user);
             userEntityProducerService.publish(user);
         });
@@ -168,6 +169,7 @@ public class UserService {
 
         outdatedUsers.forEach(user -> {
             user.setStatus(UserStatus.DISABLED);
+            user.setStatusChanged(Date.from(now));
             log.info("User with id: {} was valid until {} and will be deactivated", user.getId(), user.getValidTo());
         });
         userRepository.saveAll(outdatedUsers);
