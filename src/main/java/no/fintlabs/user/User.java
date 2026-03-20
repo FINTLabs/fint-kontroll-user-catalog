@@ -9,7 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -21,7 +24,7 @@ import java.util.stream.Stream;
 @Builder(toBuilder = true)
 @Slf4j
 @Entity
-@Table(name = "\"users\"")
+@Table(name = "users")
 @EqualsAndHashCode
 public class User {
     @Id()
@@ -58,6 +61,12 @@ public class User {
     private Date validFrom;
     @Column(name="validto")
     private Date validTo;
+    @CreationTimestamp
+    @Column(name = "createddate", updatable = false)
+    private Instant createdDate;
+    @UpdateTimestamp
+    @Column(name = "modifieddate")
+    private Instant modifiedDate;
 
     public SimpleUser toSimpleUser() {
         return SimpleUser

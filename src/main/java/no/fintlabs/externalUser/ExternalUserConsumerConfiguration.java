@@ -17,7 +17,7 @@ public class ExternalUserConsumerConfiguration {
     ){
         EntityTopicNameParameters entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
-                .resource("azureuserexternal")
+                .resource("graph-user-external")
                 .build();
 
         return entityConsumerFactoryService.createFactory(
