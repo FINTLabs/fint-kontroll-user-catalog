@@ -15,12 +15,12 @@ public class ExternalUserService {
         this.userService = userService;
     }
 
-    public void convertAndSaveAsUser(String key, ExternalUser externalUser) {
+    public void convertAndSaveAsUser(String key, ExternalUserPayload externalUser) {
         if(externalUser == null) {
             userService.markUserDeleted(key);
             return;
         }
-        FactoryUser convertedExternalUser = externalUser.toFactoryUser();
+        FactoryUser convertedExternalUser = externalUser.toFactoryUser(key);
         userService.save(convertedExternalUser.resourceId(), convertedExternalUser);
     }
 }
