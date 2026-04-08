@@ -11,19 +11,19 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 public class ExternalUserConsumerConfiguration {
 
     @Bean
-    public ConcurrentMessageListenerContainer<String, ExternalUser> externalUserConsumer(
+    public ConcurrentMessageListenerContainer<String, ExternalUserPayload> externalUserConsumer(
             ExternalUserService externalUserService,
             EntityConsumerFactoryService entityConsumerFactoryService
     ){
         EntityTopicNameParameters entityTopicNameParameters = EntityTopicNameParameters
                 .builder()
-                .resource("azureuserexternal")
+                .resource("graph-user-external")
                 .build();
 
         return entityConsumerFactoryService.createFactory(
-                        ExternalUser.class,
-                        (ConsumerRecord<String,ExternalUser> consumerRecord)
-                                -> externalUserService.convertAndSaveAsUser(consumerRecord.value()))
+                        ExternalUserPayload.class,
+                        (ConsumerRecord<String,ExternalUserPayload> consumerRecord)
+                                -> externalUserService.convertAndSaveAsUser(consumerRecord.key(), consumerRecord.value()))
                 .createContainer(entityTopicNameParameters);
 
     }

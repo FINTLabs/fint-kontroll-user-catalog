@@ -47,4 +47,5 @@ public class UserEntityProducerService {
         log.info("Republishing all {} kontrollusers triggered by {} done", users.size(), triggerType);
         return users.size();
     }
+
 }

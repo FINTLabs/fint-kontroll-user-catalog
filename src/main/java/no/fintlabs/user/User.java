@@ -9,7 +9,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -18,10 +21,10 @@ import java.util.stream.Stream;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @Slf4j
 @Entity
-@Table(name = "\"users\"")
+@Table(name = "users")
 @EqualsAndHashCode
 public class User {
     @Id()
@@ -45,7 +48,8 @@ public class User {
     private String mainOrganisationUnitId;
     @ElementCollection
     @Builder.Default
-    private List<String> organisationUnitIds = new ArrayList<>();
+    @EqualsAndHashCode.Exclude
+    private Set<String> organisationUnitIds = new HashSet<>();
     @Column(name ="email")
     private String email;
     @Column(name="managerref")
@@ -53,11 +57,20 @@ public class User {
     @Column(name = "status")
     private String status;
     @Column(name = "statuschanged")
+    @EqualsAndHashCode.Exclude
     private Date statusChanged;
     @Column(name="validfrom")
     private Date validFrom;
     @Column(name="validto")
     private Date validTo;
+    @CreationTimestamp
+    @Column(name = "createddate", updatable = false)
+    @EqualsAndHashCode.Exclude
+    private Instant createdDate;
+    @UpdateTimestamp
+    @Column(name = "modifieddate")
+    @EqualsAndHashCode.Exclude
+    private Instant modifiedDate;
 
     public SimpleUser toSimpleUser() {
         return SimpleUser
@@ -82,4 +95,5 @@ public class User {
                 .userType(userType)
                 .build();
     }
+
 }

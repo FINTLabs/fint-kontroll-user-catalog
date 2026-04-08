@@ -11,9 +11,6 @@ import java.time.Instant;
 import java.util.*;
 import java.util.function.Consumer;
 
-import static no.fintlabs.user.UserStatus.INVALID;
-
-
 @Service
 @Slf4j
 @Transactional
@@ -36,30 +33,51 @@ public class UserService {
                 .toList();
     }
 
-    public void save(User user) {
-        log.info("Received user with resourceId: {}", user.getResourceId());
+    public void save(String key, FactoryUser user) {
+        if(user == null)
+        {
+            log.info("Received tombstone for user: {}", key);
+            markUserDeleted(key);
+            return;
+        }
+        log.info("Received user with resourceId: {}", user.resourceId());
         userRepository
-                .findUserByResourceIdEqualsIgnoreCase(user.getResourceId())
+                .findUserByResourceIdEqualsIgnoreCase(user.resourceId())
                 .ifPresentOrElse(onSaveExistingUser(user), onSaveNewUser(user));
     }
 
-    private Runnable onSaveNewUser(User user) {
+    public void markUserDeleted(String key) {
+        userRepository.findUserByResourceIdEqualsIgnoreCase(key).ifPresent(user -> {
+            user.setStatus(UserStatus.DELETED);
+            user.setStatusChanged(Date.from(Instant.now()));
+            userRepository.save(user);
+            userEntityProducerService.publish(user);
+        });
+    }
+
+    private Runnable onSaveNewUser(FactoryUser user) {
         return () -> {
-            if (!UserStatus.INVALID.equals(user.getStatus())) {
-                User saved = userRepository.save(user);
-                log.info("Create new user: {}, with IdentityProviderUserObjectId:", saved.getId(), saved.getIdentityProviderUserObjectId());
-                userEntityProducerService.publish(saved);
+            if (UserStatus.VALID_STATUSES.contains(user.fintStatus())) {
+                User newUser = fromFactoryUser(user)
+                        .status(getUserStatus(user))
+                        .statusChanged(Date.from(Instant.now())).build();
+                userRepository.save(newUser);
+                log.info("Create new user: {}, with IdentityProviderUserObjectId: {}", newUser.getId(), newUser.getIdentityProviderUserObjectId());
+                userEntityProducerService.publish(newUser);
             }
 
         };
     }
 
-    private Consumer<User> onSaveExistingUser(User incomingUser) {
+    private Consumer<User> onSaveExistingUser(FactoryUser incomingUser) {
         return existingUser -> {
-            mapFromIncomingUser(existingUser, incomingUser);
+          User mappedIncoming = mapFromIncomingUser(existingUser, incomingUser);
             log.debug("Update user: {}", existingUser.getId());
-            User savedUser = userRepository.save(existingUser);
-            userEntityProducerService.publish(savedUser);
+            if(!mappedIncoming.equals(existingUser))
+            {
+                User savedUser = userRepository.save(mappedIncoming);
+                userEntityProducerService.publish(savedUser);
+            }
         };
     }
 
@@ -130,30 +148,21 @@ public class UserService {
     }
 
 
-    public static void mapFromIncomingUser(User existing, User incoming) {
-        if (existing == null || incoming == null) return;
-
-        if(INVALID.equals(incoming.getStatus())) {
-            existing.setStatus(INVALID);
-            return;
+    public User mapFromIncomingUser(User existing, FactoryUser incoming) {
+        String newStatus = getUserStatus(incoming);
+        Date statusChanged = !Objects.equals(newStatus, existing.getStatus()) ? Date.from(Instant.now()) : existing.getStatusChanged();
+        if(!UserStatus.VALID_STATUSES.contains(newStatus)) {
+            existing.setStatus(UserStatus.INVALID);
+            existing.setStatusChanged(statusChanged);
+            return existing;
         }
-        existing.setResourceId(incoming.getResourceId());
-        existing.setFirstName(incoming.getFirstName());
-        existing.setLastName(incoming.getLastName());
-        existing.setUserType(incoming.getUserType());
-        existing.setUserName(incoming.getUserName());
-        existing.setIdentityProviderUserObjectId(incoming.getIdentityProviderUserObjectId());
-        existing.setMainOrganisationUnitName(incoming.getMainOrganisationUnitName());
-        existing.setMainOrganisationUnitId(incoming.getMainOrganisationUnitId());
-        existing.setOrganisationUnitIds(incoming.getOrganisationUnitIds() == null
-                ? new ArrayList<>()
-                : new ArrayList<>(incoming.getOrganisationUnitIds()));
-        existing.setEmail(incoming.getEmail());
-        existing.setManagerRef(incoming.getManagerRef());
-        existing.setStatus(incoming.getStatus());
-        existing.setStatusChanged(incoming.getStatusChanged());
-        existing.setValidFrom(incoming.getValidFrom());
-        existing.setValidTo(incoming.getValidTo());
+
+        return fromFactoryUser(incoming)
+                .status(newStatus)
+                .organisationUnitIds(incoming.organisationUnitIds())
+                .id(existing.getId())
+                .statusChanged(statusChanged)
+                .build();
     }
 
     public List<User> deactivateOldUsers() {
@@ -163,6 +172,7 @@ public class UserService {
 
         outdatedUsers.forEach(user -> {
             user.setStatus(UserStatus.DISABLED);
+            user.setStatusChanged(Date.from(now));
             log.info("User with id: {} was valid until {} and will be deactivated", user.getId(), user.getValidTo());
         });
         userRepository.saveAll(outdatedUsers);
@@ -171,5 +181,39 @@ public class UserService {
 
     private boolean isOutdated(User user, Instant now) {
         return user.getValidTo() != null && user.getValidTo().toInstant().isBefore(now);
+    }
+
+    public User.UserBuilder fromFactoryUser(FactoryUser factoryUser) {
+        return User.builder()
+                .email(factoryUser.email())
+                .userName(factoryUser.userName())
+                .firstName(factoryUser.firstName())
+                .lastName(factoryUser.lastName())
+                .managerRef(factoryUser.managerRef())
+                .userType(factoryUser.userType())
+                .identityProviderUserObjectId(factoryUser.identityProviderUserObjectId())
+                .resourceId(factoryUser.resourceId())
+                .mainOrganisationUnitName(factoryUser.mainOrganisationUnitName())
+                .mainOrganisationUnitId(factoryUser.mainOrganisationUnitId())
+                .validFrom(factoryUser.validFrom())
+                .validTo(factoryUser.validTo());
+    }
+
+    private String getUserStatus(FactoryUser factoryUser) {
+        var entra = factoryUser.entraStatus();
+        var fint  = factoryUser.fintStatus();
+
+        if (UserStatus.DELETED.equals(entra)) return UserStatus.DELETED;
+        if (UserStatus.INVALID.equals(fint))  return UserStatus.INVALID;
+
+        if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
+            var now = new Date();
+            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
+                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
+                    ? UserStatus.ACTIVE
+                    : UserStatus.DISABLED;
+        }
+
+        return UserStatus.DISABLED;
     }
 }

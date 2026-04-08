@@ -41,7 +41,10 @@ management:
     web:
       exposure:
         include: "prometheus,health,info"
-
+jobs:
+  delete-user:
+    interval-cron: 0 0 2 * * MON
+    deleted-since-days: 30
 
 
 
