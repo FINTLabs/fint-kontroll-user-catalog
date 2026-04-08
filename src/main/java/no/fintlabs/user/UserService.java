@@ -71,10 +71,13 @@ public class UserService {
 
     private Consumer<User> onSaveExistingUser(FactoryUser incomingUser) {
         return existingUser -> {
-           existingUser = mapFromIncomingUser(existingUser, incomingUser);
+          User mappedIncoming = mapFromIncomingUser(existingUser, incomingUser);
             log.debug("Update user: {}", existingUser.getId());
-            User savedUser = userRepository.save(existingUser);
-            userEntityProducerService.publish(savedUser);
+            if(!mappedIncoming.equals(existingUser))
+            {
+                User savedUser = userRepository.save(mappedIncoming);
+                userEntityProducerService.publish(savedUser);
+            }
         };
     }
 

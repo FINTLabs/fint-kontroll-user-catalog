@@ -48,6 +48,7 @@ public class User {
     private String mainOrganisationUnitId;
     @ElementCollection
     @Builder.Default
+    @EqualsAndHashCode.Exclude
     private Set<String> organisationUnitIds = new HashSet<>();
     @Column(name ="email")
     private String email;
@@ -56,6 +57,7 @@ public class User {
     @Column(name = "status")
     private String status;
     @Column(name = "statuschanged")
+    @EqualsAndHashCode.Exclude
     private Date statusChanged;
     @Column(name="validfrom")
     private Date validFrom;
@@ -63,9 +65,11 @@ public class User {
     private Date validTo;
     @CreationTimestamp
     @Column(name = "createddate", updatable = false)
+    @EqualsAndHashCode.Exclude
     private Instant createdDate;
     @UpdateTimestamp
     @Column(name = "modifieddate")
+    @EqualsAndHashCode.Exclude
     private Instant modifiedDate;
 
     public SimpleUser toSimpleUser() {
