@@ -1,17 +1,20 @@
 package no.fintlabs.externalUser;
 
 import no.fintlabs.user.FactoryUser;
-import no.fintlabs.user.User;
 import no.fintlabs.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -23,95 +26,72 @@ class ExternalUserServiceTest {
     @Mock
     private UserService userService;
 
-
     @Test
-    public void shouldReturnUser() {
-        ExternalUser externalUser = ExternalUser
-                .builder()
-                .userName("titten@tei.no")
-                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .build();
+    void shouldMarkUserDeletedWhenExternalUserIsNull() {
+        externalUserService.convertAndSaveAsUser("4711", null);
 
-        User userToBeConverted = User
-                .builder()
-                .userName("titten@tei.no")
-                .identityProviderUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .resourceId("f37f3048-637a-11ee-8c99-0242ac120002")
-                .build();
-
-        FactoryUser convertedUser = externalUser.toFactoryUser();
-
-        assertEquals(userToBeConverted.getResourceId(), convertedUser.resourceId());
+        verify(userService).markUserDeleted("4711");
+        verify(userService, never()).save(any(), any());
     }
 
     @Test
-    public void shouldReturnUserWithDomainInSuffixWhenEmailIsPresent() {
-        ExternalUser externalUser = ExternalUser
-                .builder()
-                .userName("titten@tei.no")
-                .firstName("Titten")
-                .lastName("Tei (ekstern tei.no)")
-                .email("titten@tei.no")
-                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .build();
+    void shouldConvertAndSaveExternalUser() {
+        String key = "f37f3048-637a-11ee-8c99-0242ac120002";
 
-        User userToBeConverted = User
-                .builder()
-                .userName("titten@tei.no")
-                .lastName("Tei")
-                .email("titten@tei.no")
-                .identityProviderUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .resourceId("f37f3048-637a-11ee-8c99-0242ac120002")
-                .build();
+        ExternalUserPayload payload = new ExternalUserPayload(
+                "Titten",
+                "Tei",
+                "EXTERNAL",
+                "titten@tei.no",
+                "Org",
+                "198",
+                "titten@tei.no",
+                "titten@tei.no",
+                true
+        );
 
-        FactoryUser convertedUser = externalUser.toFactoryUser();
+        externalUserService.convertAndSaveAsUser(key, payload);
 
-        assertEquals(userToBeConverted.getResourceId(), convertedUser.resourceId());
+        ArgumentCaptor<FactoryUser> captor = ArgumentCaptor.forClass(FactoryUser.class);
+        verify(userService).save(eq(key), captor.capture());
+
+        FactoryUser saved = captor.getValue();
+        assertEquals("Titten", saved.firstName());
+        assertEquals("Tei (ekstern tei.no)", saved.lastName());
+        assertEquals("EXTERNAL", saved.userType());
+        assertEquals(key, saved.resourceId());
+        assertEquals("titten@tei.no", saved.userName());
+        assertEquals(UUID.fromString(key), saved.identityProviderUserObjectId());
+        assertEquals("Org", saved.mainOrganisationUnitName());
+        assertEquals("198", saved.mainOrganisationUnitId());
+        assertEquals("titten@tei.no", saved.email());
+        assertEquals("-", saved.fintStatus());
+        assertEquals("ACTIVE", saved.entraStatus());
     }
 
     @Test
-    public void shouldReturnUserWithoutDomainInSuffixWhenEmailIsNotPresent() {
-        ExternalUser externalUser = ExternalUser
-                .builder()
-                .userName("titten@tei.no")
-                .firstName("Titten")
-                .lastName("Tei (ekstern)")
-                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .build();
+    void shouldSetDisabledWhenAccountIsNotEnabled() {
+        String key = "f37f3048-637a-11ee-8c99-0242ac120002";
 
-        User userToBeConverted = User
-                .builder()
-                .userName("titten@tei.no")
-                .lastName("Tei")
-                .identityProviderUserObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .resourceId("f37f3048-637a-11ee-8c99-0242ac120002")
-                .build();
+        ExternalUserPayload payload = new ExternalUserPayload(
+                "Titten",
+                "Tei",
+                "EXTERNAL",
+                "titten@tei.no",
+                "Org",
+                "198",
+                null,
+                "titten@tei.no",
+                false
+        );
 
-        FactoryUser convertedUser = externalUser.toFactoryUser();
+        externalUserService.convertAndSaveAsUser(key, payload);
 
-        assertEquals(userToBeConverted.getResourceId(), convertedUser.resourceId());
+        ArgumentCaptor<FactoryUser> captor = ArgumentCaptor.forClass(FactoryUser.class);
+        verify(userService).save(eq(key), captor.capture());
+
+        FactoryUser saved = captor.getValue();
+        assertEquals("Tei (ekstern)", saved.lastName());
+        assertEquals("DISABLED", saved.entraStatus());
     }
-
-    @Test
-    public void testConvertAndSaveAsUser() {
-        ExternalUser externalUser = ExternalUser
-                .builder()
-                .userName("titten@tei.no")
-                .firstName("Titten")
-                .lastName("Tei (ekstern)")
-                .userObjectId(UUID.fromString("f37f3048-637a-11ee-8c99-0242ac120002"))
-                .userType("EXTERNAL")
-                .build();
-
-        externalUserService.convertAndSaveAsUser("f37f3048-637a-11ee-8c99-0242ac120002", externalUser);
-
-        verify(userService).save("f37f3048-637a-11ee-8c99-0242ac120002", externalUser.toFactoryUser());
-    }
-
 }
