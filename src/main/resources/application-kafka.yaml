@@ -3,7 +3,7 @@ novari:
     default-replicas: 1
     topic:
       domain-context: kontroll
-      org-id: ${fint.org-id}
+      org-id: fintlabs-no
     application-id: ${fint.application-id}
 spring:
   kafka:
