@@ -13,8 +13,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 @ConfigurationPropertiesScan
-@SpringBootApplication
 @EnableScheduling
+@SpringBootApplication(scanBasePackages = {"no.fintlabs", "no.novari"})
 public class Application {
 
     public static void main(String[] args) {
