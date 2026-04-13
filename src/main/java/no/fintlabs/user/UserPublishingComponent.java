@@ -18,8 +18,7 @@ public class UserPublishingComponent {
         this.userService = userService;
     }
     @Scheduled(
-            fixedDelayString = "${fint.kontroll.user-catalog.publishing.fixed-delay}",
-            timeUnit = TimeUnit.DAYS
+            cron = "${fint.kontroll.user-catalog.publishing.cron}"
     )
     public void publishUsers() {
         String triggerType = "scheduled job";
