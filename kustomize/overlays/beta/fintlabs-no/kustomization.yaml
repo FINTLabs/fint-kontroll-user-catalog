@@ -34,6 +34,9 @@ patches:
       - op: replace
         path: "/spec/url/basePath"
         value: "/beta/fintlabs-no"
+      - op: replace
+        path: "/spec/env/3/value"
+        value: "fintlabs-no"
     target:
       kind: Application
       name: fint-kontroll-user-catalog

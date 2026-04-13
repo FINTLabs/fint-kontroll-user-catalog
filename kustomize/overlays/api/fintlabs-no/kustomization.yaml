@@ -43,6 +43,9 @@ patches:
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/fintlabs-no/actuator/prometheus"
+      - op: replace
+        path: "/spec/env/3/value"
+        value: "fintlabs-no"
       - op: add
         path: "/spec/resources"
         value:
