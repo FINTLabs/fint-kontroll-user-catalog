@@ -1,38 +1,53 @@
 package no.fintlabs.user;
 
 import lombok.extern.slf4j.Slf4j;
-import no.fintlabs.kafka.entity.EntityProducer;
-import no.fintlabs.kafka.entity.EntityProducerFactory;
-import no.fintlabs.kafka.entity.EntityProducerRecord;
-import no.fintlabs.kafka.entity.topic.EntityTopicNameParameters;
-import no.fintlabs.kafka.entity.topic.EntityTopicService;
+import no.novari.kafka.producing.ParameterizedProducerRecord;
+import no.novari.kafka.producing.ParameterizedTemplate;
+import no.novari.kafka.producing.ParameterizedTemplateFactory;
+import no.novari.kafka.topic.EntityTopicService;
+import no.novari.kafka.topic.configuration.EntityCleanupFrequency;
+import no.novari.kafka.topic.configuration.EntityTopicConfiguration;
+import no.novari.kafka.topic.name.EntityTopicNameParameters;
+import no.novari.kafka.topic.name.TopicNamePrefixParameters;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 
 @Service
 @Slf4j
 public class UserEntityProducerService {
-    private final EntityProducer<User> entityProducer;
+    private final ParameterizedTemplate<User> parameterizedTemplate;
     private final EntityTopicNameParameters entityTopicNameParameters;
 
     public UserEntityProducerService(
-            EntityProducerFactory entityProducerFactory,
+            ParameterizedTemplateFactory parameterizedTemplateFactory,
             EntityTopicService entityTopicService
     ) {
-        entityProducer = entityProducerFactory.createProducer(User.class);
-        entityTopicNameParameters = EntityTopicNameParameters
+        this.parameterizedTemplate = parameterizedTemplateFactory.createTemplate(User.class);
+        entityTopicNameParameters =  EntityTopicNameParameters
                 .builder()
-                .resource("kontrolluser")
+                .topicNamePrefixParameters(TopicNamePrefixParameters
+                        .stepBuilder()
+                        .orgIdApplicationDefault()
+                        .domainContextApplicationDefault().build())
+                .resourceName("kontrolluser")
                 .build();
-        entityTopicService.ensureTopic(entityTopicNameParameters,0);
+
+        entityTopicService.createOrModifyTopic(entityTopicNameParameters, EntityTopicConfiguration.stepBuilder()
+                .partitions(1)
+                .lastValueRetainedForever()
+                .nullValueRetentionTime(Duration.ofDays(7))
+                .cleanupFrequency(EntityCleanupFrequency.NORMAL)
+                .build()
+        );
     }
 
     public void publish(User user){
         String key = user.getResourceId();
         log.info("Publishing user with resourceId: {}", user.getResourceId());
-        entityProducer.send(
-                EntityProducerRecord.<User>builder()
+        parameterizedTemplate.send(
+                ParameterizedProducerRecord.<User>builder()
                         .topicNameParameters(entityTopicNameParameters)
                         .key(key)
                         .value(user)

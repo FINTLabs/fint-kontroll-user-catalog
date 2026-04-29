@@ -43,6 +43,9 @@ patches:
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/vlfk-no/actuator/prometheus"
+      - op: replace
+        path: "/spec/env/3/value"
+        value: "vlfk-no"
       - op: add
         path: "/spec/resources"
         value:

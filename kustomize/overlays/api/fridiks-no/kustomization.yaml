@@ -40,6 +40,9 @@ patches:
       - op: replace
         path: "/spec/observability/metrics/path"
         value: "/fridiks-no/actuator/prometheus"
+      - op: replace
+        path: "/spec/env/3/value"
+        value: "fridiks-no"
       - op: add
         path: "/spec/resources"
         value:

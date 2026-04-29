@@ -98,7 +98,6 @@ public class UserController {
     @OnlyDevelopers
     @PostMapping("/republish")
     public ResponseEntity<Map<String,Object>> republishKontrollUsers(@AuthenticationPrincipal Jwt jwt) {
-        //
 
         String triggerType = "admin (" + FintJwtEndUserPrincipal.from(jwt).getMail() + ") request";
         List<User> allUsers = userService.getAllUsers();
