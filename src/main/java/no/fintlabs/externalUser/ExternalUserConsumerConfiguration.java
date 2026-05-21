@@ -47,7 +47,7 @@ public class ExternalUserConsumerConfiguration {
                                 .orgIdApplicationDefault()
                                 .domainContextApplicationDefault()
                                 .build())
-                        .resourceName("azureuserexternal")
+                        .resourceName("graph-user-external")
                         .build());
 
     }
