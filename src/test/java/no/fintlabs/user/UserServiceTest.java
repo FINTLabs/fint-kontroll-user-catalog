@@ -22,7 +22,6 @@ import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -150,6 +149,7 @@ class UserServiceTest {
         assertEquals(user1, result.getFirst());
     }
 
+
     @Test
     void shouldCreateAndPublishNewUserWhenIncomingUserIsValidAndNotFound() {
         FactoryUser incomingUser = FactoryUser.builder()
@@ -230,6 +230,34 @@ class UserServiceTest {
     }
 
     @Test
+    void shouldSetStatusWhenExistingUserHasNullStatus() {
+        User existingUser = User.builder()
+                .id(1L)
+                .resourceId("4711")
+                .firstName("Existing")
+                .lastName("User")
+                .build();
+
+        FactoryUser incomingUser = FactoryUser.builder()
+                .resourceId("4711")
+                .firstName("Existing")
+                .lastName("User")
+                .fintStatus(UserStatus.ACTIVE)
+                .entraStatus(UserStatus.ACTIVE)
+                .build();
+
+        when(userRepository.findUserByResourceIdEqualsIgnoreCase("4711")).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userService.save("4711", incomingUser);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        assertEquals(UserStatus.ACTIVE, userCaptor.getValue().getStatus());
+        assertNotNull(userCaptor.getValue().getStatusChanged());
+    }
+
+    @Test
     void shouldNotCreateUserWhenIncomingUserStatusIsInvalid() {
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
@@ -243,6 +271,36 @@ class UserServiceTest {
 
         verify(userRepository, never()).save(any(User.class));
         verify(userEntityProducerService, never()).publish(any(User.class));
+    }
+
+    @Test
+    void shouldSaveAndPublishExistingUserWhenIncomingStatusIsInvalid() {
+        Date originalStatusChanged = Date.from(Instant.parse("2024-01-01T00:00:00Z"));
+
+        User existingUser = User.builder()
+                .id(1L)
+                .resourceId("4711")
+                .status(UserStatus.ACTIVE)
+                .statusChanged(originalStatusChanged)
+                .build();
+
+        FactoryUser incomingUser = FactoryUser.builder()
+                .resourceId("4711")
+                .fintStatus(UserStatus.INVALID)
+                .entraStatus(UserStatus.ACTIVE)
+                .build();
+
+        when(userRepository.findUserByResourceIdEqualsIgnoreCase("4711")).thenReturn(Optional.of(existingUser));
+        when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        userService.save("4711", incomingUser);
+
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+        verify(userRepository).save(userCaptor.capture());
+        verify(userEntityProducerService).publish(userCaptor.getValue());
+        assertEquals(UserStatus.INVALID, userCaptor.getValue().getStatus());
+        assertNotNull(userCaptor.getValue().getStatusChanged());
+        assertTrue(userCaptor.getValue().getStatusChanged().after(originalStatusChanged));
     }
 
     @Test
@@ -379,7 +437,6 @@ class UserServiceTest {
 
         User result = userService.mapFromIncomingUser(existingUser, incomingUser);
 
-        assertSame(existingUser, result);
         assertEquals(UserStatus.INVALID, result.getStatus());
         assertNotNull(result.getStatusChanged());
         assertTrue(result.getStatusChanged().after(originalStatusChanged));
@@ -404,7 +461,6 @@ class UserServiceTest {
 
         User result = userService.mapFromIncomingUser(existingUser, incomingUser);
 
-        assertSame(existingUser, result);
         assertEquals(UserStatus.INVALID, result.getStatus());
         assertEquals(originalStatusChanged, result.getStatusChanged());
     }

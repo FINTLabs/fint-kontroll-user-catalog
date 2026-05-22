@@ -54,7 +54,7 @@ public class User {
     private String email;
     @Column(name="managerref")
     private  String managerRef;
-    @Column(name = "status")
+    @Column(name = "status", nullable = false)
     private String status;
     @Column(name = "statuschanged")
     @EqualsAndHashCode.Exclude

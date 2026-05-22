@@ -113,7 +113,7 @@ public class UserService {
         List<User> userList = userRepository.findAll(userSpesification.build());
 
         return userList.stream()
-                .filter(user -> user.getStatus().equals(UserStatus.ACTIVE))
+                .filter(user -> UserStatus.ACTIVE.equals(user.getStatus()))
                 .map(User::toSimpleUser)
                 .toList();
     }
@@ -152,9 +152,10 @@ public class UserService {
         String newStatus = getUserStatus(incoming);
         Date statusChanged = !Objects.equals(newStatus, existing.getStatus()) ? Date.from(Instant.now()) : existing.getStatusChanged();
         if(!UserStatus.VALID_STATUSES.contains(newStatus)) {
-            existing.setStatus(UserStatus.INVALID);
-            existing.setStatusChanged(statusChanged);
-            return existing;
+            return existing.toBuilder()
+                    .status(UserStatus.INVALID)
+                    .statusChanged(statusChanged)
+                    .build();
         }
 
         return fromFactoryUser(incoming)
