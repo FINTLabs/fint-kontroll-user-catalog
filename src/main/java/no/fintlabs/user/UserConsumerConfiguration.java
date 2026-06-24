@@ -17,7 +17,7 @@ import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 public class UserConsumerConfiguration {
 
     @Bean
-    public ConcurrentMessageListenerContainer<String, User> userConsumer(
+    public ConcurrentMessageListenerContainer<String, FactoryUser> userConsumer(
             UserService userService,
             ErrorHandlerFactory errorHandlerFactory,
             ParameterizedListenerContainerFactoryService parameterizedListenerContainerFactoryService
@@ -31,9 +31,9 @@ public class UserConsumerConfiguration {
                 .build();
 
         return parameterizedListenerContainerFactoryService.createRecordListenerContainerFactory(
-                User.class,
-                (ConsumerRecord<String, User> consumerRecord)
-                        -> userService.save(consumerRecord.value()),
+                FactoryUser.class,
+                (ConsumerRecord<String, FactoryUser> consumerRecord)
+                        -> userService.save(consumerRecord.key(), consumerRecord.value()),
                 listenerConfiguration,
                 errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
                         .stepBuilder()
