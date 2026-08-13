@@ -7,6 +7,7 @@ import no.fintlabs.ProblemDetailFactory;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.AuthRole;
 import no.fintlabs.opa.model.MenuItem;
+import no.novari.kafka.consuming.OffsetSeekingTrigger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +59,9 @@ public class UserControllerTest {
     @MockBean
     private UserEntityProducerService userEntityProducerService;
 
+    @MockBean
+    private OffsetSeekingTrigger userOffsetSeekingTrigger;
+
     @Autowired
     private WebApplicationContext context;
 
@@ -69,7 +73,7 @@ public class UserControllerTest {
 
     @BeforeEach
     public void setup() {
-        this.mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService, responseFactory, authorizationClient, userEntityProducerService)).build();
+        this.mockMvc = MockMvcBuilders.standaloneSetup(new UserController(userService, responseFactory, authorizationClient, userEntityProducerService, userOffsetSeekingTrigger)).build();
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.context).build();
     }
 
@@ -170,6 +174,21 @@ public class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content(invalidRequestBody))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldTriggerReloadUsersFromKafka() throws Exception {
+        String principalMail = "test@example.com";
+        String role = "ROLE_USER";
+        Jwt jwt = createMockJwtToken(role, principalMail);
+        createSecurityContext(jwt, role);
+
+        mockMvc.perform(post("/api/users/reload-from-kafka"))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.message").value("User consumer seek to beginning triggered"))
+                .andExpect(jsonPath("$.triggeredBy").value(principalMail));
+
+        verify(userOffsetSeekingTrigger, times(1)).seekToBeginning();
     }
 
 
