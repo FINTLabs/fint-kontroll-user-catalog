@@ -72,7 +72,7 @@ public class UserService {
     private Consumer<User> onSaveExistingUser(FactoryUser incomingUser) {
         return existingUser -> {
           User mappedIncoming = mapFromIncomingUser(existingUser, incomingUser);
-            log.debug("Update user: {}", existingUser.getId());
+            log.info("Update existing user: {}", existingUser.getId());
             if(!mappedIncoming.equals(existingUser))
             {
                 User savedUser = userRepository.save(mappedIncoming);
