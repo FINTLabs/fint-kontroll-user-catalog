@@ -35,7 +35,12 @@ public class UserController {
     private final ResponseFactory responseFactory;
     private final AuthorizationClient authorizationClient;
 
-    public UserController(UserService userService, ResponseFactory responseFactory, AuthorizationClient authorizationClient, UserEntityProducerService userEntityProducerService, OffsetSeekingTrigger userOffsetSeekingTrigger) {
+    public UserController(
+            UserService userService,
+            ResponseFactory responseFactory,
+            AuthorizationClient authorizationClient,
+            UserEntityProducerService userEntityProducerService,
+            OffsetSeekingTrigger userOffsetSeekingTrigger) {
         this.userService = userService;
         this.responseFactory = responseFactory;
         this.authorizationClient = authorizationClient;
@@ -118,11 +123,11 @@ public class UserController {
     @PostMapping("/reload-from-kafka")
     public ResponseEntity<Map<String, Object>> reloadUsersFromKafka(@AuthenticationPrincipal Jwt jwt) {
         String email = (jwt != null) ? FintJwtEndUserPrincipal.from(jwt).getMail() : "unknown";
-        log.info("Seeking user consumer to beginning triggered by admin ({}) request", email);
+        log.info("Admin endpoint triggered to read user topic from beginning by admin ({}) request", email);
         userOffsetSeekingTrigger.seekToBeginning();
 
         return ResponseEntity.accepted().body(Map.of(
-                "message", "User consumer seek to beginning triggered",
+                "message", "User topic read from beginning triggered",
                 "triggeredBy", email
         ));
     }

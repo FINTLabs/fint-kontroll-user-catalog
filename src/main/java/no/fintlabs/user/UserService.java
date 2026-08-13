@@ -208,11 +208,12 @@ public class UserService {
         if (UserStatus.INVALID.equals(fint))  return UserStatus.INVALID;
 
         if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
-            var now = new Date();
-            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
-                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
-                    ? UserStatus.ACTIVE
-                    : UserStatus.DISABLED;
+//            var now = new Date();
+//            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
+//                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
+//                    ? UserStatus.ACTIVE
+//                    : UserStatus.DISABLED;
+            return UserStatus.ACTIVE;
         }
 
         return UserStatus.DISABLED;
