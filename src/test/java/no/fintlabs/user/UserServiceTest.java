@@ -508,25 +508,25 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldReturnDisabledWhenStatusesAreActiveButValidFromIsInFuture() throws Exception {
+    void shouldReturnActiveWhenStatusesAreActiveAndValidFromIsInFuture() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
                 .fintStatus(UserStatus.ACTIVE)
                 .entraStatus(UserStatus.ACTIVE)
                 .validFrom(Date.from(Instant.now().plusSeconds(60)))
                 .build();
 
-        assertEquals(UserStatus.DISABLED, invokeGetUserStatus(incomingUser));
+        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
     }
 
     @Test
-    void shouldReturnDisabledWhenStatusesAreActiveButValidToIsInPast() throws Exception {
+    void shouldReturnActiveWhenStatusesAreActiveAndValidToIsInPast() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
                 .fintStatus(UserStatus.ACTIVE)
                 .entraStatus(UserStatus.ACTIVE)
                 .validTo(Date.from(Instant.now().minusSeconds(60)))
                 .build();
 
-        assertEquals(UserStatus.DISABLED, invokeGetUserStatus(incomingUser));
+        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
     }
 
     @Test

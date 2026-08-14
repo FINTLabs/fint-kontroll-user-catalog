@@ -185,7 +185,7 @@ public class UserControllerTest {
 
         mockMvc.perform(post("/api/users/reload-from-kafka"))
                 .andExpect(status().isAccepted())
-                .andExpect(jsonPath("$.message").value("User consumer seek to beginning triggered"))
+                .andExpect(jsonPath("$.message").value("User topic read from beginning triggered"))
                 .andExpect(jsonPath("$.triggeredBy").value(principalMail));
 
         verify(userOffsetSeekingTrigger, times(1)).seekToBeginning();
