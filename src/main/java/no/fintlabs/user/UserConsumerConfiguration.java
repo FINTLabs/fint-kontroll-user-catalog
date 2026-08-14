@@ -1,6 +1,7 @@
 package no.fintlabs.user;
 
 
+import lombok.extern.slf4j.Slf4j;
 import no.novari.kafka.consuming.ErrorHandlerConfiguration;
 import no.novari.kafka.consuming.ErrorHandlerFactory;
 import no.novari.kafka.consuming.ListenerConfiguration;
@@ -13,7 +14,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.listener.ConcurrentMessageListenerContainer;
 
-
+@Slf4j
 @Configuration
 public class UserConsumerConfiguration {
 
@@ -41,7 +42,9 @@ public class UserConsumerConfiguration {
         return parameterizedListenerContainerFactoryService.createRecordListenerContainerFactory(
                 FactoryUser.class,
                 (ConsumerRecord<String, FactoryUser> consumerRecord)
-                        -> userService.save(consumerRecord.key(), consumerRecord.value()),
+                        -> {
+                    log.info("Received user from kafka: {}", consumerRecord.key());
+                    userService.save(consumerRecord.key(), consumerRecord.value());},
                 listenerConfiguration,
                 errorHandlerFactory.createErrorHandler(ErrorHandlerConfiguration
                         .stepBuilder()

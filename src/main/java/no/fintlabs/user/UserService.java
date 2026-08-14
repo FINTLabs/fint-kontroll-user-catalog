@@ -204,8 +204,14 @@ public class UserService {
         var entra = factoryUser.entraStatus();
         var fint  = factoryUser.fintStatus();
 
-        if (UserStatus.DELETED.equals(entra)) return UserStatus.DELETED;
-        if (UserStatus.INVALID.equals(fint))  return UserStatus.INVALID;
+        if (UserStatus.DELETED.equals(entra)) {
+            log.info("Status is deleted for user: {}, {}", factoryUser.resourceId(),factoryUser.userName() );
+            return UserStatus.DELETED;
+        }
+        if (UserStatus.INVALID.equals(fint))  {
+            log.info("Status is invalid for user: {}, {}", factoryUser.resourceId(),factoryUser.userName() );
+            return UserStatus.INVALID;
+        }
 
         if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
 //            var now = new Date();
@@ -213,9 +219,11 @@ public class UserService {
 //                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
 //                    ? UserStatus.ACTIVE
 //                    : UserStatus.DISABLED;
+            log.info("Status is active for user: {}, {}", factoryUser.resourceId(),factoryUser.userName() );
             return UserStatus.ACTIVE;
         }
 
+        log.info("Status is disabled for user: {}, {}", factoryUser.resourceId(),factoryUser.userName() );
         return UserStatus.DISABLED;
     }
 }
