@@ -76,7 +76,7 @@ public class UserService {
             log.info("Update existing user: {}", existingUser.getId());
             if(!mappedIncoming.equals(existingUser))
             {
-                if(!existingUser.getStatus().equals(mappedIncoming.getStatus())){
+                if(existingUser.getStatus() == null || !existingUser.getStatus().equals(mappedIncoming.getStatus())){
                     log.info("Status is changed for user: {}, from: {}, to: {}", mappedIncoming.getId(),existingUser.getStatus(),mappedIncoming.getStatus());
                 }
                 User savedUser = userRepository.save(mappedIncoming);
