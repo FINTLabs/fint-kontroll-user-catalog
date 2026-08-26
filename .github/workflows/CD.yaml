@@ -10,6 +10,8 @@ on:
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
+  JAVA-VERSION: "21"
+  JAVA-DISTRIBUTION: "zulu"
 
 jobs:
   build-and-push:
@@ -22,7 +24,16 @@ jobs:
       tags: ${{ steps.meta.outputs.tags }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: ${{ env.JAVA-DISTRIBUTION }}
+          java-version: ${{ env.JAVA-VERSION }}
+          cache: 'gradle'
+
+      - name: Build with Gradle
+        run: ./gradlew build --no-daemon
 
       - name: Login to Docker Hub
         uses: docker/login-action@v4
@@ -32,14 +43,14 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract metadata (tags, labels) for Docker
-        uses: docker/metadata-action@v6
+        uses: docker/metadata-action@v5
         id: meta
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: type=sha,enable=true,priority=100,prefix=shaF-,suffix=,format=short
 
       - name: Build and push Docker image
-        uses: docker/build-push-action@v7
+        uses: docker/build-push-action@v6
         with:
           context: .
           push: true
@@ -58,11 +69,11 @@ jobs:
         include:
           - org: fintlabs-no
             cluster: aks-beta-fint-2021-11-23
-          - org: ofk-no
-            cluster: aks-api-fint-2022-02-08
           - org: afk-no
             cluster: aks-api-fint-2022-02-08
           - org: bfk-no
+            cluster: aks-api-fint-2022-02-08
+          - org: ofk-no
             cluster: aks-api-fint-2022-02-08
           - org: fridiks-no
             cluster: aks-api-fint-2022-02-08
@@ -70,12 +81,10 @@ jobs:
             cluster: aks-api-fint-2022-02-08
           - org: fintlabs-no
             cluster: aks-api-fint-2022-02-08
-          - org: vlfk-no
-            cluster: aks-api-fint-2022-02-08
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Get environment
         uses: actions/github-script@v8
@@ -93,21 +102,35 @@ jobs:
 
       - name: Bake manifests with Kustomize
         id: bake
-        uses: azure/k8s-bake@v3
+        uses: azure/k8s-bake@v4
         with:
           renderEngine: 'kustomize'
           kustomizationPath: 'kustomize/overlays/${{ steps.environment.outputs.result }}/${{ matrix.org }}'
 
-      - uses: azure/login@v2
+      - name: Substitute image into baked YAML
+        id: substitute
+        uses: Azure/k8s-artifact-substitute@v2
+        with:
+          manifests: ${{ steps.bake.outputs.manifestsBundle }}
+          images: ${{ needs.build-and-push.outputs.tags }}
+
+      - name: Copy substituted manifest into workspace
+        id: bake-in-workspace
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.baked"
+          cp "${{ steps.substitute.outputs.manifests }}" "$GITHUB_WORKSPACE/.baked/manifest.yaml"
+          echo "manifest=$GITHUB_WORKSPACE/.baked/manifest.yaml" >> "$GITHUB_OUTPUT"
+
+      - uses: azure/login@v3
         with:
           creds: "${{ secrets[format('AKS_{0}_FINT_GITHUB', steps.environment.outputs.result)] }}"
 
-      - uses: azure/use-kubelogin@v1.2
+      - uses: azure/use-kubelogin@v1
         with:
-          kubelogin-version: 'v0.0.26'
+          kubelogin-version: 'v0.0.32'
 
       - name: Set the target cluster
-        uses: azure/aks-set-context@v5
+        uses: azure/aks-set-context@v4
         with:
           cluster-name: '${{ matrix.cluster }}'
           resource-group: '${{ steps.resource-group.outputs.result }}'
@@ -115,9 +138,9 @@ jobs:
           use-kubelogin: 'true'
 
       - name: Deploy
-        uses: azure/k8s-deploy@v5.0.3
+        uses: azure/k8s-deploy@v7.0.0
         with:
           action: deploy
-          manifests: ${{ steps.bake.outputs.manifestsBundle }}
-          images: ${{ needs.build-and-push.outputs.tags }}
+          manifests: ${{ steps.bake-in-workspace.outputs.manifest }}
           namespace: ${{ matrix.org }}
+          pull-images: false
