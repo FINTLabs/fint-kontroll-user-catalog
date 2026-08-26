@@ -5,6 +5,7 @@ import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.AuthRole;
 import no.fintlabs.opa.model.MenuItem;
 import no.fintlabs.util.OnlyDevelopers;
+import no.novari.kafka.consuming.OffsetSeekingTrigger;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,15 +30,22 @@ public class UserController {
 
     private final UserService userService;
     private final UserEntityProducerService userEntityProducerService;
+    private final OffsetSeekingTrigger userOffsetSeekingTrigger;
 
     private final ResponseFactory responseFactory;
     private final AuthorizationClient authorizationClient;
 
-    public UserController(UserService userService, ResponseFactory responseFactory, AuthorizationClient authorizationClient, UserEntityProducerService userEntityProducerService) {
+    public UserController(
+            UserService userService,
+            ResponseFactory responseFactory,
+            AuthorizationClient authorizationClient,
+            UserEntityProducerService userEntityProducerService,
+            OffsetSeekingTrigger userOffsetSeekingTrigger) {
         this.userService = userService;
         this.responseFactory = responseFactory;
         this.authorizationClient = authorizationClient;
         this.userEntityProducerService = userEntityProducerService;
+        this.userOffsetSeekingTrigger = userOffsetSeekingTrigger;
     }
 
 
@@ -109,6 +117,19 @@ public class UserController {
         int noOfPublishedUsers = userEntityProducerService.publishKontrollUsers(triggerType, allUsers);
 
         return responseFactory.toResponseEntity("Republished " + noOfPublishedUsers + " users");
+    }
+
+    @OnlyDevelopers
+    @PostMapping("/reload-from-kafka")
+    public ResponseEntity<Map<String, Object>> reloadUsersFromKafka(@AuthenticationPrincipal Jwt jwt) {
+        String email = (jwt != null) ? FintJwtEndUserPrincipal.from(jwt).getMail() : "unknown";
+        log.info("Admin endpoint triggered to read user topic from beginning by admin ({}) request", email);
+        userOffsetSeekingTrigger.seekToBeginning();
+
+        return ResponseEntity.accepted().body(Map.of(
+                "message", "User topic read from beginning triggered",
+                "triggeredBy", email
+        ));
     }
 
     @PostMapping("/me/hasaccess")

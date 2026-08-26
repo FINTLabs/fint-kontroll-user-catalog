@@ -71,10 +71,14 @@ public class UserService {
 
     private Consumer<User> onSaveExistingUser(FactoryUser incomingUser) {
         return existingUser -> {
+
           User mappedIncoming = mapFromIncomingUser(existingUser, incomingUser);
             log.info("Update existing user: {}", existingUser.getId());
             if(!mappedIncoming.equals(existingUser))
             {
+                if(existingUser.getStatus() == null || !existingUser.getStatus().equals(mappedIncoming.getStatus())){
+                    log.info("Status is changed for user: {}, from: {}, to: {}", mappedIncoming.getId(),existingUser.getStatus(),mappedIncoming.getStatus());
+                }
                 User savedUser = userRepository.save(mappedIncoming);
                 userEntityProducerService.publish(savedUser);
             }
@@ -204,17 +208,28 @@ public class UserService {
         var entra = factoryUser.entraStatus();
         var fint  = factoryUser.fintStatus();
 
-        if (UserStatus.DELETED.equals(entra)) return UserStatus.DELETED;
-        if (UserStatus.INVALID.equals(fint))  return UserStatus.INVALID;
 
-        if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
-            var now = new Date();
-            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
-                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
-                    ? UserStatus.ACTIVE
-                    : UserStatus.DISABLED;
+
+        if (UserStatus.DELETED.equals(entra)) {
+            log.info("Status is deleted for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
+            return UserStatus.DELETED;
+        }
+        if (UserStatus.INVALID.equals(fint))  {
+            log.info("Status is invalid for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
+            return UserStatus.INVALID;
         }
 
+        if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
+//            var now = new Date();
+//            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
+//                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
+//                    ? UserStatus.ACTIVE
+//                    : UserStatus.DISABLED;
+            log.info("Status is active for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
+            return UserStatus.ACTIVE;
+        }
+
+        log.info("Status is disabled for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
         return UserStatus.DISABLED;
     }
 }

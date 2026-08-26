@@ -58,7 +58,12 @@ spring:
     lock-retry-count: 300
     #baseline-on-migrate: true
 
-
+logging:
+  level:
+    root: INFO
+    org.apache.kafka: INFO
+    no.fintlabs.user.UserController: DEBUG
+    no.fintlabs.user.UserConsumerConfiguration: DEBUG
 server:
   port: 8083
 
