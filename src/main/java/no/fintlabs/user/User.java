@@ -1,6 +1,5 @@
 package no.fintlabs.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
@@ -57,12 +56,6 @@ public class User {
     private  String managerRef;
     @Column(name = "status", nullable = false)
     private String status;
-    @JsonIgnore
-    @Column(name="fintstatus")
-    private String fintStatus;
-    @JsonIgnore
-    @Column(name="entrastatus")
-    private String entraStatus;
     @Column(name = "statuschanged")
     @EqualsAndHashCode.Exclude
     private Date statusChanged;

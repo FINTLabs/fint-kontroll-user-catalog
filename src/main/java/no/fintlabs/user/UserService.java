@@ -56,7 +56,6 @@ public class UserService {
     public void markUserDeleted(String key) {
         userRepository.findUserByResourceIdEqualsIgnoreCase(key).ifPresent(user -> {
             user.setStatus(UserStatus.DELETED);
-            user.setEntraStatus(UserStatus.DELETED);
             user.setStatusChanged(Date.from(Instant.now()));
             userRepository.save(user);
             userEntityProducerService.publish(user);
@@ -164,8 +163,6 @@ public class UserService {
             // Invalid/deleted source updates can be minimal. Preserve the last
             // complete user details and only change catalog status metadata.
             return existing.toBuilder()
-                    .fintStatus(incoming.fintStatus())
-                    .entraStatus(incoming.entraStatus())
                     .status(newStatus)
                     .statusChanged(statusChanged)
                     .build();
@@ -195,27 +192,6 @@ public class UserService {
         return outdatedUsers;
     }
 
-    public List<User> reconcileTimeBasedUserStatuses() {
-        Date statusChanged = Date.from(Instant.now());
-        List<User> changedUsers = new ArrayList<>();
-
-        for (User user : userRepository.findAll()) {
-            String reconciledStatus = getUserStatus(user);
-            if (!Objects.equals(reconciledStatus, user.getStatus())) {
-                user.setStatus(reconciledStatus);
-                user.setStatusChanged(statusChanged);
-                changedUsers.add(user);
-            }
-        }
-
-        if (!changedUsers.isEmpty()) {
-            userRepository.saveAll(changedUsers);
-            userEntityProducerService.publishKontrollUsers("scheduled status reconciliation", changedUsers);
-        }
-
-        return changedUsers;
-    }
-
     private boolean isOutdated(User user, Instant now) {
         return user.getValidTo() != null && user.getValidTo().toInstant().isBefore(now);
     }
@@ -234,70 +210,34 @@ public class UserService {
                 .mainOrganisationUnitId(factoryUser.mainOrganisationUnitId())
                 .validFrom(factoryUser.validFrom())
                 .validTo(factoryUser.validTo())
-                .fintStatus(factoryUser.fintStatus())
-                .entraStatus(factoryUser.entraStatus())
                 .build();
     }
 
     private String getUserStatus(FactoryUser factoryUser) {
-        return getUserStatus(
-                factoryUser.entraStatus(),
-                factoryUser.fintStatus(),
-                factoryUser.validFrom(),
-                factoryUser.validTo(),
-                factoryUser.userType()
-        );
-    }
+        var entra = factoryUser.entraStatus();
+        var fint  = factoryUser.fintStatus();
 
-    private String getUserStatus(User user) {
-        if (!UserStatus.VALID_STATUSES.contains(user.getStatus())) {
-            return user.getStatus();
-        }
-
-        if (UserStatus.ACTIVE.equals(user.getStatus()) && isOutdated(user, Instant.now())) {
-            return UserStatus.DISABLED;
-        }
-
-        if (user.getFintStatus() == null ||
-                user.getEntraStatus() == null) {
-            return user.getStatus();
-        }
-
-        return getUserStatus(
-                user.getEntraStatus(),
-                user.getFintStatus(),
-                user.getValidFrom(),
-                user.getValidTo(),
-                user.getUserType()
-        );
-    }
-
-    private String getUserStatus(String entra, String fint, Date validFrom, Date validTo, String userType) {
         // Factory publishes source facts only; final catalog status is derived here.
         if (UserStatus.DELETED.equals(entra)) return UserStatus.DELETED;
 
-        Optional<String> legacyStatus = getStatusFromLegacyFintStatus(fint, entra, validFrom, validTo, userType);
+        Optional<String> legacyStatus = getStatusFromLegacyFintStatus(factoryUser);
         if (legacyStatus.isPresent()) return legacyStatus.get();
 
         if (FintStatus.INVALID.equals(fint))  return UserStatus.INVALID;
         if (!FintStatus.VALID.equals(fint)) return UserStatus.INVALID;
 
-        return getStatusWhenFintDataIsValid(entra, validFrom, validTo, userType);
+        return getStatusWhenFintDataIsValid(factoryUser);
     }
 
-    private Optional<String> getStatusFromLegacyFintStatus(
-            String fintStatus,
-            String entraStatus,
-            Date validFrom,
-            Date validTo,
-            String userType
-    ) {
+    private Optional<String> getStatusFromLegacyFintStatus(FactoryUser factoryUser) {
+        String fintStatus = factoryUser.fintStatus();
+
         // TODO FKS-1648: Remove this rollout bridge after every factory emits
         // VALID/INVALID and legacy ACTIVE/DISABLED Kafka records can no longer
         // be replayed. Old factory versions put final catalog status in
         // fintStatus, so keep those values compatible during deployment.
         if (UserStatus.ACTIVE.equals(fintStatus)) {
-            return Optional.of(getStatusWhenFintDataIsValid(entraStatus, validFrom, validTo, userType));
+            return Optional.of(getStatusWhenFintDataIsValid(factoryUser));
         }
 
         if (UserStatus.DISABLED.equals(fintStatus)) {
@@ -307,13 +247,15 @@ public class UserService {
         return Optional.empty();
     }
 
-    private String getStatusWhenFintDataIsValid(String entra, Date validFrom, Date validTo, String userType) {
+    private String getStatusWhenFintDataIsValid(FactoryUser factoryUser) {
+        var entra = factoryUser.entraStatus();
+
         if (UserStatus.DISABLED.equals(entra)) return UserStatus.DISABLED;
 
         if (UserStatus.ACTIVE.equals(entra)) {
             var now = new Date();
-            return (validFrom == null || !getValidFrom(validFrom, userType).after(now)) &&
-                    (validTo   == null || !validTo.before(now))
+            return (factoryUser.validFrom() == null || !getValidFrom(factoryUser).after(now)) &&
+                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
                     ? UserStatus.ACTIVE
                     : UserStatus.DISABLED;
         }
@@ -329,14 +271,14 @@ public class UserService {
         return UserStatus.INVALID.equals(status) || UserStatus.DELETED.equals(status);
     }
 
-    private Date getValidFrom(Date validFrom, String userType) {
+    private Date getValidFrom(FactoryUser factoryUser) {
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(validFrom);
-        calendar.add(Calendar.DATE, -getDaysBeforeStart(userType));
+        calendar.setTime(factoryUser.validFrom());
+        calendar.add(Calendar.DATE, -getDaysBeforeStart(factoryUser));
         return calendar.getTime();
     }
 
-    private int getDaysBeforeStart(String userType) {
-        return "STUDENT".equals(userType) ? daysBeforeStartStudent : daysBeforeStartEmployee;
+    private int getDaysBeforeStart(FactoryUser factoryUser) {
+        return "STUDENT".equals(factoryUser.userType()) ? daysBeforeStartStudent : daysBeforeStartEmployee;
     }
 }
