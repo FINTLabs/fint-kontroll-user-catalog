@@ -179,6 +179,8 @@ class UserServiceTest {
         User savedUser = userCaptor.getValue();
         assertEquals("4711", savedUser.getResourceId());
         assertEquals(UserStatus.ACTIVE, savedUser.getStatus());
+        assertEquals(FintStatus.VALID, savedUser.getFintStatus());
+        assertEquals(UserStatus.ACTIVE, savedUser.getEntraStatus());
         assertNotNull(savedUser.getStatusChanged());
     }
 
@@ -302,6 +304,8 @@ class UserServiceTest {
         verify(userRepository).save(userCaptor.capture());
         verify(userEntityProducerService).publish(userCaptor.getValue());
         assertEquals(UserStatus.INVALID, userCaptor.getValue().getStatus());
+        assertEquals(FintStatus.INVALID, userCaptor.getValue().getFintStatus());
+        assertEquals(UserStatus.ACTIVE, userCaptor.getValue().getEntraStatus());
         assertEquals("Existing", userCaptor.getValue().getFirstName());
         assertEquals("User", userCaptor.getValue().getLastName());
         assertNotNull(userCaptor.getValue().getStatusChanged());
@@ -321,6 +325,7 @@ class UserServiceTest {
         userService.save("4711", null);
 
         assertEquals(UserStatus.DELETED, existingUser.getStatus());
+        assertEquals(UserStatus.DELETED, existingUser.getEntraStatus());
         assertNotNull(existingUser.getStatusChanged());
         verify(userRepository).save(existingUser);
         verify(userEntityProducerService).publish(existingUser);
@@ -339,6 +344,7 @@ class UserServiceTest {
         userService.markUserDeleted("4711");
 
         assertEquals(UserStatus.DELETED, existingUser.getStatus());
+        assertEquals(UserStatus.DELETED, existingUser.getEntraStatus());
         assertNotNull(existingUser.getStatusChanged());
         verify(userRepository).save(existingUser);
         verify(userEntityProducerService).publish(existingUser);
@@ -651,6 +657,94 @@ class UserServiceTest {
         assertEquals(UserStatus.DISABLED, disabledOutdatedUser.getStatus());
         assertNotNull(outdatedUser.getStatusChanged());
         verify(userRepository).saveAll(List.of(outdatedUser));
+    }
+
+    @Test
+    void shouldActivateDisabledUserWhenStartWindowOpensDuringReconciliation() {
+        Date originalStatusChanged = Date.from(Instant.parse("2024-01-01T00:00:00Z"));
+        User user = User.builder()
+                .id(1L)
+                .resourceId("4711")
+                .status(UserStatus.DISABLED)
+                .statusChanged(originalStatusChanged)
+                .fintStatus(FintStatus.VALID)
+                .entraStatus(UserStatus.ACTIVE)
+                .validFrom(Date.from(Instant.now().minusSeconds(60)))
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<User> result = userService.reconcileTimeBasedUserStatuses();
+
+        assertEquals(List.of(user), result);
+        assertEquals(UserStatus.ACTIVE, user.getStatus());
+        assertTrue(user.getStatusChanged().after(originalStatusChanged));
+        verify(userRepository).saveAll(List.of(user));
+        verify(userEntityProducerService).publishKontrollUsers("scheduled status reconciliation", List.of(user));
+    }
+
+    @Test
+    void shouldDisableActiveUserWhenValidToHasPassedDuringReconciliation() {
+        Date originalStatusChanged = Date.from(Instant.parse("2024-01-01T00:00:00Z"));
+        User user = User.builder()
+                .id(1L)
+                .resourceId("4711")
+                .status(UserStatus.ACTIVE)
+                .statusChanged(originalStatusChanged)
+                .fintStatus(FintStatus.VALID)
+                .entraStatus(UserStatus.ACTIVE)
+                .validTo(Date.from(Instant.now().minusSeconds(60)))
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<User> result = userService.reconcileTimeBasedUserStatuses();
+
+        assertEquals(List.of(user), result);
+        assertEquals(UserStatus.DISABLED, user.getStatus());
+        assertTrue(user.getStatusChanged().after(originalStatusChanged));
+        verify(userRepository).saveAll(List.of(user));
+        verify(userEntityProducerService).publishKontrollUsers("scheduled status reconciliation", List.of(user));
+    }
+
+    @Test
+    void shouldNotActivateDisabledUserWithoutSourceStatusesDuringReconciliation() {
+        User user = User.builder()
+                .id(1L)
+                .resourceId("4711")
+                .status(UserStatus.DISABLED)
+                .validFrom(Date.from(Instant.now().minusSeconds(60)))
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<User> result = userService.reconcileTimeBasedUserStatuses();
+
+        assertTrue(result.isEmpty());
+        assertEquals(UserStatus.DISABLED, user.getStatus());
+        verify(userRepository, never()).saveAll(any());
+        verify(userEntityProducerService, never()).publishKontrollUsers(any(), any());
+    }
+
+    @Test
+    void shouldNotActivateDisabledUserWhenEntraStatusIsDisabledDuringReconciliation() {
+        User user = User.builder()
+                .id(1L)
+                .resourceId("4711")
+                .status(UserStatus.DISABLED)
+                .fintStatus(FintStatus.VALID)
+                .entraStatus(UserStatus.DISABLED)
+                .validFrom(Date.from(Instant.now().minusSeconds(60)))
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(user));
+
+        List<User> result = userService.reconcileTimeBasedUserStatuses();
+
+        assertTrue(result.isEmpty());
+        assertEquals(UserStatus.DISABLED, user.getStatus());
+        verify(userRepository, never()).saveAll(any());
+        verify(userEntityProducerService, never()).publishKontrollUsers(any(), any());
     }
 
     @Test

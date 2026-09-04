@@ -32,3 +32,8 @@ When an existing catalog user receives `INVALID` or a tombstone, only `status`
 and `statusChanged` are updated. Existing identity, name, username, and org data
 are kept because invalid payloads from the factory may be intentionally minimal.
 New users are created only for derived `ACTIVE` or `DISABLED` statuses.
+
+The catalog stores the latest source statuses from regular factory payloads and
+reconciles time-based status changes on a schedule. This activates users when
+their configured start window opens and disables active users after `validTo`,
+publishing every changed user.

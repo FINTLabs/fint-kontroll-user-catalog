@@ -37,6 +37,8 @@ spec:
       value: '0'
     - name: fint.kontroll.user.days-before-start-student
       value: '0'
+    - name: fint.kontroll.user.status-reconciliation.interval-cron
+      value: '0 0 * * * *'
 
   envFrom:
     - configMapRef:

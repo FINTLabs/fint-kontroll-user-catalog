@@ -10,6 +10,8 @@ fint:
     user:
       days-before-start-employee: 10
       days-before-start-student: 5
+      status-reconciliation:
+        interval-cron: "0 0 * * * *"
     user-catalog:
       pagesize: 50
       publishing:
@@ -47,5 +49,4 @@ jobs:
   delete-user:
     interval-cron: 0 0 2 * * MON
     deleted-since-days: 30
-
 
