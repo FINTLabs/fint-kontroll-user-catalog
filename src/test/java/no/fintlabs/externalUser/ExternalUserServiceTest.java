@@ -1,6 +1,7 @@
 package no.fintlabs.externalUser;
 
 import no.fintlabs.user.FactoryUser;
+import no.fintlabs.user.FintStatus;
 import no.fintlabs.user.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,7 +66,7 @@ class ExternalUserServiceTest {
         assertEquals("Org", saved.mainOrganisationUnitName());
         assertEquals("198", saved.mainOrganisationUnitId());
         assertEquals("titten@tei.no", saved.email());
-        assertEquals("-", saved.fintStatus());
+        assertEquals(FintStatus.VALID, saved.fintStatus());
         assertEquals("ACTIVE", saved.entraStatus());
     }
 
