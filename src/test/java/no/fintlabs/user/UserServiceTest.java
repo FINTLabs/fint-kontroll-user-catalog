@@ -517,14 +517,14 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldReturnActiveWhenStatusesAreActiveAndValidFromIsInFuture() throws Exception {
+    void shouldReturnDisabledWhenFintDataIsValidButValidFromIsInFuture() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
                 .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .validFrom(Date.from(Instant.now().plusSeconds(60)))
                 .build();
 
-        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
+        assertEquals(UserStatus.DISABLED, invokeGetUserStatus(incomingUser));
     }
 
     @Test
@@ -556,14 +556,14 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldReturnActiveWhenStatusesAreActiveAndValidToIsInPast() throws Exception {
+    void shouldReturnDisabledWhenFintDataIsValidButValidToIsInPast() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
                 .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .validTo(Date.from(Instant.now().minusSeconds(60)))
                 .build();
 
-        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
+        assertEquals(UserStatus.DISABLED, invokeGetUserStatus(incomingUser));
     }
 
     // TODO FKS-1648: Remove these rollout bridge tests together with
