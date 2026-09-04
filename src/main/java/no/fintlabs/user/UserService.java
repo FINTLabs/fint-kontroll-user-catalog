@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.fintlabs.opa.AuthorizationClient;
 import no.fintlabs.opa.model.Scope;
 import no.vigoiks.resourceserver.security.FintJwtEndUserPrincipal;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +19,12 @@ public class UserService {
     private final UserRepository userRepository;
     private final UserEntityProducerService userEntityProducerService;
     private final AuthorizationClient authorizationClient;
+
+    @Value("${fint.kontroll.user.days-before-start-employee:0}")
+    private int daysBeforeStartEmployee;
+
+    @Value("${fint.kontroll.user.days-before-start-student:0}")
+    private int daysBeforeStartStudent;
 
 
     public UserService(UserRepository userRepository, UserEntityProducerService userEntityProducerService, AuthorizationClient authorizationClient) {
@@ -57,10 +64,11 @@ public class UserService {
 
     private Runnable onSaveNewUser(FactoryUser user) {
         return () -> {
-            if (UserStatus.VALID_STATUSES.contains(user.fintStatus())) {
-                User newUser = fromFactoryUser(user)
-                        .status(getUserStatus(user))
-                        .statusChanged(Date.from(Instant.now())).build();
+            String status = getUserStatus(user);
+            if (shouldCreateUser(status)) {
+                User newUser = fromFactoryUser(user);
+                newUser.setStatus(status);
+                newUser.setStatusChanged(Date.from(Instant.now()));
                 userRepository.save(newUser);
                 log.info("Create new user: {}, with IdentityProviderUserObjectId: {}", newUser.getId(), newUser.getIdentityProviderUserObjectId());
                 userEntityProducerService.publish(newUser);
@@ -71,14 +79,10 @@ public class UserService {
 
     private Consumer<User> onSaveExistingUser(FactoryUser incomingUser) {
         return existingUser -> {
-
           User mappedIncoming = mapFromIncomingUser(existingUser, incomingUser);
             log.info("Update existing user: {}", existingUser.getId());
             if(!mappedIncoming.equals(existingUser))
             {
-                if(existingUser.getStatus() == null || !existingUser.getStatus().equals(mappedIncoming.getStatus())){
-                    log.info("Status is changed for user: {}, from: {}, to: {}", mappedIncoming.getId(),existingUser.getStatus(),mappedIncoming.getStatus());
-                }
                 User savedUser = userRepository.save(mappedIncoming);
                 userEntityProducerService.publish(savedUser);
             }
@@ -155,25 +159,29 @@ public class UserService {
     public User mapFromIncomingUser(User existing, FactoryUser incoming) {
         String newStatus = getUserStatus(incoming);
         Date statusChanged = !Objects.equals(newStatus, existing.getStatus()) ? Date.from(Instant.now()) : existing.getStatusChanged();
-        if(!UserStatus.VALID_STATUSES.contains(newStatus)) {
+        if(shouldUpdateStatusOnly(newStatus)) {
+            // Invalid/deleted source updates can be minimal. Preserve the last
+            // complete user details and only change catalog status metadata.
             return existing.toBuilder()
-                    .status(UserStatus.INVALID)
+                    .status(newStatus)
                     .statusChanged(statusChanged)
                     .build();
         }
 
-        return fromFactoryUser(incoming)
-                .status(newStatus)
-                .organisationUnitIds(incoming.organisationUnitIds())
-                .id(existing.getId())
-                .statusChanged(statusChanged)
-                .build();
+        User mappedUser = fromFactoryUser(incoming);
+        mappedUser.setStatus(newStatus);
+        mappedUser.setOrganisationUnitIds(incoming.organisationUnitIds());
+        mappedUser.setId(existing.getId());
+        mappedUser.setStatusChanged(statusChanged);
+        return mappedUser;
     }
 
     public List<User> deactivateOldUsers() {
         Instant now = Instant.now();
-        List<User> outdatedUsers = userRepository.findAll().stream().filter(
-                user -> isOutdated(user, now)).toList();
+        List<User> outdatedUsers = userRepository.findAll().stream()
+                .filter(user -> UserStatus.ACTIVE.equals(user.getStatus()))
+                .filter(user -> isOutdated(user, now))
+                .toList();
 
         outdatedUsers.forEach(user -> {
             user.setStatus(UserStatus.DISABLED);
@@ -188,7 +196,7 @@ public class UserService {
         return user.getValidTo() != null && user.getValidTo().toInstant().isBefore(now);
     }
 
-    public User.UserBuilder fromFactoryUser(FactoryUser factoryUser) {
+    public User fromFactoryUser(FactoryUser factoryUser) {
         return User.builder()
                 .email(factoryUser.email())
                 .userName(factoryUser.userName())
@@ -201,35 +209,76 @@ public class UserService {
                 .mainOrganisationUnitName(factoryUser.mainOrganisationUnitName())
                 .mainOrganisationUnitId(factoryUser.mainOrganisationUnitId())
                 .validFrom(factoryUser.validFrom())
-                .validTo(factoryUser.validTo());
+                .validTo(factoryUser.validTo())
+                .build();
     }
 
     private String getUserStatus(FactoryUser factoryUser) {
         var entra = factoryUser.entraStatus();
         var fint  = factoryUser.fintStatus();
 
+        // Factory publishes source facts only; final catalog status is derived here.
+        if (UserStatus.DELETED.equals(entra)) return UserStatus.DELETED;
 
+        Optional<String> legacyStatus = getStatusFromLegacyFintStatus(factoryUser);
+        if (legacyStatus.isPresent()) return legacyStatus.get();
 
-        if (UserStatus.DELETED.equals(entra)) {
-            log.info("Status is deleted for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
-            return UserStatus.DELETED;
+        if (FintStatus.INVALID.equals(fint))  return UserStatus.INVALID;
+        if (!FintStatus.VALID.equals(fint)) return UserStatus.INVALID;
+
+        return getStatusWhenFintDataIsValid(factoryUser);
+    }
+
+    private Optional<String> getStatusFromLegacyFintStatus(FactoryUser factoryUser) {
+        String fintStatus = factoryUser.fintStatus();
+
+        // TODO FKS-1648: Remove this rollout bridge after every factory emits
+        // VALID/INVALID and legacy ACTIVE/DISABLED Kafka records can no longer
+        // be replayed. Old factory versions put final catalog status in
+        // fintStatus, so keep those values compatible during deployment.
+        if (UserStatus.ACTIVE.equals(fintStatus)) {
+            return Optional.of(getStatusWhenFintDataIsValid(factoryUser));
         }
-        if (UserStatus.INVALID.equals(fint))  {
-            log.info("Status is invalid for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
-            return UserStatus.INVALID;
+
+        if (UserStatus.DISABLED.equals(fintStatus)) {
+            return Optional.of(UserStatus.DISABLED);
         }
 
-        if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
-//            var now = new Date();
-//            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
-//                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
-//                    ? UserStatus.ACTIVE
-//                    : UserStatus.DISABLED;
-            log.info("Status is active for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
-            return UserStatus.ACTIVE;
+        return Optional.empty();
+    }
+
+    private String getStatusWhenFintDataIsValid(FactoryUser factoryUser) {
+        var entra = factoryUser.entraStatus();
+
+        if (UserStatus.DISABLED.equals(entra)) return UserStatus.DISABLED;
+
+        if (UserStatus.ACTIVE.equals(entra)) {
+            var now = new Date();
+            return (factoryUser.validFrom() == null || !getValidFrom(factoryUser).after(now)) &&
+                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))
+                    ? UserStatus.ACTIVE
+                    : UserStatus.DISABLED;
         }
 
-        log.info("Status is disabled for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
         return UserStatus.DISABLED;
+    }
+
+    private boolean shouldCreateUser(String status) {
+        return UserStatus.VALID_STATUSES.contains(status);
+    }
+
+    private boolean shouldUpdateStatusOnly(String status) {
+        return UserStatus.INVALID.equals(status) || UserStatus.DELETED.equals(status);
+    }
+
+    private Date getValidFrom(FactoryUser factoryUser) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(factoryUser.validFrom());
+        calendar.add(Calendar.DATE, -getDaysBeforeStart(factoryUser));
+        return calendar.getTime();
+    }
+
+    private int getDaysBeforeStart(FactoryUser factoryUser) {
+        return "STUDENT".equals(factoryUser.userType()) ? daysBeforeStartStudent : daysBeforeStartEmployee;
     }
 }

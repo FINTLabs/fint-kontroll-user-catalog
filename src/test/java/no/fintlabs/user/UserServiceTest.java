@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.lang.reflect.Method;
 import java.time.Instant;
@@ -163,7 +164,7 @@ class UserServiceTest {
                 .mainOrganisationUnitName("Org")
                 .organisationUnitIds(Set.of("198"))
                 .userType("EXTERNAL")
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -204,7 +205,7 @@ class UserServiceTest {
                 .mainOrganisationUnitId("198")
                 .mainOrganisationUnitName("Org")
                 .organisationUnitIds(Set.of("198", "200"))
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -242,7 +243,7 @@ class UserServiceTest {
                 .resourceId("4711")
                 .firstName("Existing")
                 .lastName("User")
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -261,7 +262,7 @@ class UserServiceTest {
     void shouldNotCreateUserWhenIncomingUserStatusIsInvalid() {
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
-                .fintStatus(UserStatus.INVALID)
+                .fintStatus(FintStatus.INVALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -280,13 +281,15 @@ class UserServiceTest {
         User existingUser = User.builder()
                 .id(1L)
                 .resourceId("4711")
+                .firstName("Existing")
+                .lastName("User")
                 .status(UserStatus.ACTIVE)
                 .statusChanged(originalStatusChanged)
                 .build();
 
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
-                .fintStatus(UserStatus.INVALID)
+                .fintStatus(FintStatus.INVALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -299,6 +302,8 @@ class UserServiceTest {
         verify(userRepository).save(userCaptor.capture());
         verify(userEntityProducerService).publish(userCaptor.getValue());
         assertEquals(UserStatus.INVALID, userCaptor.getValue().getStatus());
+        assertEquals("Existing", userCaptor.getValue().getFirstName());
+        assertEquals("User", userCaptor.getValue().getLastName());
         assertNotNull(userCaptor.getValue().getStatusChanged());
         assertTrue(userCaptor.getValue().getStatusChanged().after(originalStatusChanged));
     }
@@ -346,19 +351,21 @@ class UserServiceTest {
         User existingUser = User.builder()
                 .id(1L)
                 .resourceId("4711")
+                .firstName("Existing")
                 .status(UserStatus.ACTIVE)
                 .statusChanged(originalStatusChanged)
                 .build();
 
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
-                .fintStatus(UserStatus.INVALID)
+                .fintStatus(FintStatus.INVALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
         User result = userService.mapFromIncomingUser(existingUser, incomingUser);
 
         assertEquals(UserStatus.INVALID, result.getStatus());
+        assertEquals("Existing", result.getFirstName());
         assertNotNull(result.getStatusChanged());
     }
 
@@ -378,7 +385,7 @@ class UserServiceTest {
                 .firstName("Updated")
                 .lastName("User")
                 .userName("updated@example.com")
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .organisationUnitIds(Set.of("198", "200"))
                 .build();
@@ -407,7 +414,7 @@ class UserServiceTest {
 
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.DISABLED)
                 .build();
 
@@ -419,7 +426,7 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldMutateExistingUserAndSetInvalidWhenIncomingStatusResolvesToDeleted() {
+    void shouldUpdateOnlyStatusWhenIncomingStatusResolvesToDeleted() {
         Date originalStatusChanged = Date.from(Instant.parse("2024-01-01T00:00:00Z"));
 
         User existingUser = User.builder()
@@ -427,17 +434,19 @@ class UserServiceTest {
                 .resourceId("4711")
                 .status(UserStatus.ACTIVE)
                 .statusChanged(originalStatusChanged)
+                .firstName("Existing")
                 .build();
 
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.DELETED)
                 .build();
 
         User result = userService.mapFromIncomingUser(existingUser, incomingUser);
 
-        assertEquals(UserStatus.INVALID, result.getStatus());
+        assertEquals(UserStatus.DELETED, result.getStatus());
+        assertEquals("Existing", result.getFirstName());
         assertNotNull(result.getStatusChanged());
         assertTrue(result.getStatusChanged().after(originalStatusChanged));
     }
@@ -455,7 +464,7 @@ class UserServiceTest {
 
         FactoryUser incomingUser = FactoryUser.builder()
                 .resourceId("4711")
-                .fintStatus(UserStatus.INVALID)
+                .fintStatus(FintStatus.INVALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -468,7 +477,7 @@ class UserServiceTest {
     @Test
     void shouldReturnDeletedWhenEntraStatusIsDeleted() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.DELETED)
                 .build();
 
@@ -478,7 +487,7 @@ class UserServiceTest {
     @Test
     void shouldReturnInvalidWhenFintStatusIsInvalid() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
-                .fintStatus(UserStatus.INVALID)
+                .fintStatus(FintStatus.INVALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -488,7 +497,7 @@ class UserServiceTest {
     @Test
     void shouldReturnActiveWhenStatusesAreActiveAndNoDateRestrictions() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -498,7 +507,7 @@ class UserServiceTest {
     @Test
     void shouldReturnActiveWhenStatusesAreActiveAndCurrentDateIsWithinWindow() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .validFrom(Date.from(Instant.now().minusSeconds(60)))
                 .validTo(Date.from(Instant.now().plusSeconds(60)))
@@ -510,7 +519,7 @@ class UserServiceTest {
     @Test
     void shouldReturnActiveWhenStatusesAreActiveAndValidFromIsInFuture() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .validFrom(Date.from(Instant.now().plusSeconds(60)))
                 .build();
@@ -519,9 +528,37 @@ class UserServiceTest {
     }
 
     @Test
+    void shouldReturnActiveForEmployeeWithinDaysBeforeStartWindow() throws Exception {
+        ReflectionTestUtils.setField(userService, "daysBeforeStartEmployee", 10);
+
+        FactoryUser incomingUser = FactoryUser.builder()
+                .fintStatus(FintStatus.VALID)
+                .entraStatus(UserStatus.ACTIVE)
+                .userType("EMPLOYEESTAFF")
+                .validFrom(Date.from(Instant.now().plusSeconds(9 * 24 * 60 * 60)))
+                .build();
+
+        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
+    }
+
+    @Test
+    void shouldReturnActiveForStudentWithinDaysBeforeStartWindow() throws Exception {
+        ReflectionTestUtils.setField(userService, "daysBeforeStartStudent", 5);
+
+        FactoryUser incomingUser = FactoryUser.builder()
+                .fintStatus(FintStatus.VALID)
+                .entraStatus(UserStatus.ACTIVE)
+                .userType("STUDENT")
+                .validFrom(Date.from(Instant.now().plusSeconds(4 * 24 * 60 * 60)))
+                .build();
+
+        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
+    }
+
+    @Test
     void shouldReturnActiveWhenStatusesAreActiveAndValidToIsInPast() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(UserStatus.ACTIVE)
                 .validTo(Date.from(Instant.now().minusSeconds(60)))
                 .build();
@@ -529,8 +566,21 @@ class UserServiceTest {
         assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
     }
 
+    // TODO FKS-1648: Remove these rollout bridge tests together with
+    // UserService#getStatusFromLegacyFintStatus after factory has fully moved
+    // from fintStatus=ACTIVE/DISABLED to fintStatus=VALID/INVALID.
     @Test
-    void shouldReturnDisabledWhenStatusesAreNotDeletedInvalidOrBothActive() throws Exception {
+    void shouldReturnActiveForLegacyActiveFintStatusDuringFactoryRollout() throws Exception {
+        FactoryUser incomingUser = FactoryUser.builder()
+                .fintStatus(UserStatus.ACTIVE)
+                .entraStatus(UserStatus.ACTIVE)
+                .build();
+
+        assertEquals(UserStatus.ACTIVE, invokeGetUserStatus(incomingUser));
+    }
+
+    @Test
+    void shouldReturnDisabledForLegacyDisabledFintStatusDuringFactoryRollout() throws Exception {
         FactoryUser incomingUser = FactoryUser.builder()
                 .fintStatus(UserStatus.DISABLED)
                 .entraStatus(UserStatus.ACTIVE)
@@ -540,7 +590,17 @@ class UserServiceTest {
     }
 
     @Test
-    void shouldDeactivateOutdatedUsers() {
+    void shouldReturnInvalidWhenFintStatusIsUnknown() throws Exception {
+        FactoryUser incomingUser = FactoryUser.builder()
+                .fintStatus("UNKNOWN")
+                .entraStatus(UserStatus.ACTIVE)
+                .build();
+
+        assertEquals(UserStatus.INVALID, invokeGetUserStatus(incomingUser));
+    }
+
+    @Test
+    void shouldDeactivateOnlyActiveOutdatedUsers() {
         Instant now = Instant.now();
 
         User outdatedUser = User.builder()
@@ -555,13 +615,40 @@ class UserServiceTest {
                 .validTo(Date.from(now.plusSeconds(60)))
                 .build();
 
-        when(userRepository.findAll()).thenReturn(List.of(outdatedUser, currentUser));
+        User deletedOutdatedUser = User.builder()
+                .id(3L)
+                .status(UserStatus.DELETED)
+                .validTo(Date.from(now.minusSeconds(60)))
+                .build();
+
+        User invalidOutdatedUser = User.builder()
+                .id(4L)
+                .status(UserStatus.INVALID)
+                .validTo(Date.from(now.minusSeconds(60)))
+                .build();
+
+        User disabledOutdatedUser = User.builder()
+                .id(5L)
+                .status(UserStatus.DISABLED)
+                .validTo(Date.from(now.minusSeconds(60)))
+                .build();
+
+        when(userRepository.findAll()).thenReturn(List.of(
+                outdatedUser,
+                currentUser,
+                deletedOutdatedUser,
+                invalidOutdatedUser,
+                disabledOutdatedUser
+        ));
 
         List<User> result = userService.deactivateOldUsers();
 
         assertEquals(1, result.size());
         assertEquals(outdatedUser, result.getFirst());
         assertEquals(UserStatus.DISABLED, outdatedUser.getStatus());
+        assertEquals(UserStatus.DELETED, deletedOutdatedUser.getStatus());
+        assertEquals(UserStatus.INVALID, invalidOutdatedUser.getStatus());
+        assertEquals(UserStatus.DISABLED, disabledOutdatedUser.getStatus());
         assertNotNull(outdatedUser.getStatusChanged());
         verify(userRepository).saveAll(List.of(outdatedUser));
     }

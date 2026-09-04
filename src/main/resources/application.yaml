@@ -7,6 +7,9 @@ fint:
 #    service:
 #      authorized-role: https://role-catalog.vigoiks.no/vigo/kontroll/user
   kontroll:
+    user:
+      days-before-start-employee: 10
+      days-before-start-student: 5
     user-catalog:
       pagesize: 50
       publishing:
@@ -44,6 +47,5 @@ jobs:
   delete-user:
     interval-cron: 0 0 2 * * MON
     deleted-since-days: 30
-
 
 

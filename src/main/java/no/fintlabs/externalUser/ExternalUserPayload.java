@@ -2,6 +2,7 @@ package no.fintlabs.externalUser;
 
 import lombok.Builder;
 import no.fintlabs.user.FactoryUser;
+import no.fintlabs.user.FintStatus;
 
 import java.util.UUID;
 @Builder
@@ -28,12 +29,11 @@ public record ExternalUserPayload(String firstName,
                 .mainOrganisationUnitName(mainOrganisationUnitName)
                 .mainOrganisationUnitId(mainOrganisationUnitId)
                 .email(email)
-                .fintStatus("-")
+                .fintStatus(FintStatus.VALID)
                 .entraStatus(accountEnabled?"ACTIVE" :"DISABLED")
                 .build();
     }
 }
-
 
 
 
