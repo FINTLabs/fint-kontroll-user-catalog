@@ -57,7 +57,7 @@ public class UserService {
 
     private Runnable onSaveNewUser(FactoryUser user) {
         return () -> {
-            if (UserStatus.VALID_STATUSES.contains(user.fintStatus())) {
+            if ((user.userType() !=null && user.userType().equals("EXTERNAL"))||UserStatus.VALID_STATUSES.contains(user.fintStatus())) {
                 User newUser = fromFactoryUser(user)
                         .status(getUserStatus(user))
                         .statusChanged(Date.from(Instant.now())).build();
@@ -205,21 +205,24 @@ public class UserService {
     }
 
     private String getUserStatus(FactoryUser factoryUser) {
-        var entra = factoryUser.entraStatus();
-        var fint  = factoryUser.fintStatus();
+        var entraUserStatus = factoryUser.entraStatus();
+        var fintUserStatus  = factoryUser.fintStatus();
 
+        if (factoryUser.userType()!=null && factoryUser.userType().equals("EXTERNAL")) {
+            log.info("Status is {} for external user: {}, {}", entraUserStatus, factoryUser.resourceId(),factoryUser.userName() );
+            return entraUserStatus;
+        }
 
-
-        if (UserStatus.DELETED.equals(entra)) {
+        if (UserStatus.DELETED.equals(entraUserStatus)) {
             log.info("Status is deleted for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
             return UserStatus.DELETED;
         }
-        if (UserStatus.INVALID.equals(fint))  {
+        if (UserStatus.INVALID.equals(fintUserStatus))  {
             log.info("Status is invalid for user: {}, {}, {}", factoryUser.resourceId(),factoryUser.userName(),factoryUser.userType() );
             return UserStatus.INVALID;
         }
 
-        if (UserStatus.ACTIVE.equals(entra) && UserStatus.ACTIVE.equals(fint)) {
+        if (UserStatus.ACTIVE.equals(entraUserStatus) && UserStatus.ACTIVE.equals(fintUserStatus)) {
 //            var now = new Date();
 //            return (factoryUser.validFrom() == null || !factoryUser.validFrom().after(now)) &&
 //                    (factoryUser.validTo()   == null || !factoryUser.validTo().before(now))

@@ -159,11 +159,8 @@ class UserServiceTest {
                 .userName("titten@tei.no")
                 .email("titten@tei.no")
                 .identityProviderUserObjectId(UUID.fromString("3f2b9b63-47e9-43c2-9d61-dd078d621479"))
-                .mainOrganisationUnitId("198")
-                .mainOrganisationUnitName("Org")
-                .organisationUnitIds(Set.of("198"))
                 .userType("EXTERNAL")
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus("-")
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -201,10 +198,7 @@ class UserServiceTest {
                 .userName("updated@example.com")
                 .email("updated@example.com")
                 .userType("EXTERNAL")
-                .mainOrganisationUnitId("198")
-                .mainOrganisationUnitName("Org")
-                .organisationUnitIds(Set.of("198", "200"))
-                .fintStatus(UserStatus.ACTIVE)
+                .fintStatus("-")
                 .entraStatus(UserStatus.ACTIVE)
                 .build();
 
@@ -226,7 +220,6 @@ class UserServiceTest {
         assertEquals("updated@example.com", savedUser.getEmail());
         assertEquals(UserStatus.ACTIVE, savedUser.getStatus());
         assertEquals(originalStatusChanged, savedUser.getStatusChanged());
-        assertEquals(Set.of("198", "200"), savedUser.getOrganisationUnitIds());
     }
 
     @Test
